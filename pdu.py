@@ -14,6 +14,7 @@ class PDU(object):
         self._outlets = outlets
 
 
+    # TODO: get rid of os.system().
     def _perform_cmd(self, action, outlet):
         CMD = "snmpset -v 1 -c private %s 1.3.6.1.4.1.318.1.1.12.3.3.1.1.4.%i i %i"
         os.system(CMD % (self._ip, outlet, action))
