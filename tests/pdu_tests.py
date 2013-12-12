@@ -1,7 +1,6 @@
 import sys
 sys.path.append("/home/user/_cluster/cntrl_hac")
 sys.path.append("/home/user/_cluster/testutil_hac")
-from cluster import Cluster
 from exceptionz import DeviceError
 from pdu import PDU
 
