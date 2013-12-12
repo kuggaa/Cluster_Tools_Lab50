@@ -1,7 +1,8 @@
-import os
+import netsnmp
 
 
 class PDU(object):
+    CMD = ".1.3.6.1.4.1.318.1.1.12.3.3.1.1.4.%i"
     class action(object):
         ON = 1
         OFF = 2
@@ -14,10 +15,9 @@ class PDU(object):
         self._outlets = outlets
 
 
-    # TODO: get rid of os.system().
     def _perform_cmd(self, action, outlet):
-        CMD = "snmpset -v 1 -c private %s 1.3.6.1.4.1.318.1.1.12.3.3.1.1.4.%i i %i"
-        os.system(CMD % (self._ip, outlet, action))
+        cmd = netsnmp.Varbind(PDU.CMD % (outlet), val=action, type="INTEGER")
+        netsnmp.snmpset(cmd, Version=1, DestHost=self._ip, Community="private")
 
 
     def off(self, device):

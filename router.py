@@ -1,7 +1,8 @@
-import os
+import netsnmp
 
 
 class Router(object):
+    CMD = ".1.3.6.1.2.1.2.2.1.7.%i"
     class action(object):
         ENABLE = 1
         DISABLE = 2
@@ -13,10 +14,9 @@ class Router(object):
         self._ports = ports
 
 
-    # TODO: get rid of os.system().
     def _perform_cmd(self, action, port):
-        CMD = "snmpset -v 1 -c private %s 1.3.6.1.2.1.2.2.1.7.%i i %i"
-        os.system(CMD % (self._ip, port, action))
+        cmd = netsnmp.Varbind(Router.CMD % (port), val=action, type="INTEGER")
+        netsnmp.snmpset(cmd, Version=1, DestHost=self._ip, Community="private")
 
 
     def disable_port(self, device):
@@ -37,5 +37,5 @@ class Device(object):
 
 
 #kvg1 = Device("kvg1")
-#router = Router("router", "192.168.50.174", {"kvg1": 13})
+#router = Router("router", "192.168.50.174", {"kvg1": 20})
 #router.enable_port(kvg1)
