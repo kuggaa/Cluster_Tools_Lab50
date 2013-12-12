@@ -9,10 +9,15 @@ class PDU(object):
         REBOOT = 3
 
 
-    def __init__(self, id, ip, outlets):
+    def __init__(self, id, settings):
         self.id = id
-        self._ip = ip
-        self._outlets = outlets
+        self._ip = settings["ip"]
+
+        self._outlets = {}
+        for param, val in settings.iteritems():
+            if ("outlet" in param):
+                outlet = int(param.replace("outlet", ""))
+                self._outlets[val] = outlet
 
 
     def _perform_cmd(self, action, outlet):

@@ -8,10 +8,15 @@ class Router(object):
         DISABLE = 2
 
 
-    def __init__(self, id, ip, ports):
+    def __init__(self, id, settings):
         self.id = id
-        self._ip = ip
-        self._ports = ports
+        self._ip = settings["ip"]
+
+        self._ports = {}
+        for param, val in settings.iteritems():
+            if ("port" in param):
+                port = int(param.replace("port", ""))
+                self._ports[val] = port
 
 
     def _perform_cmd(self, action, port):
