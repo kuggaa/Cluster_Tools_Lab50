@@ -33,8 +33,8 @@ class Ololobster(Cluster):
 
 ololobster = Ololobster()
 ololobster.update()
-pdu_1 = ololobster.get_pdu("pdu_1")
-hp2530_1 = ololobster.get_router("hp2530_1")
+pdu_2 = ololobster.get_pdu("pdu_2")
+hp2530_2 = ololobster.get_router("hp2530_2")
 
 #hp2530_1.enable_port(pdu_1)
-#pdu_1.on(hp2530_1)
+pdu_2.on(hp2530_2)
