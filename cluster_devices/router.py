@@ -1,3 +1,10 @@
+"""
+Router.
+Just a wrap for netsnmp.
+Tested on HP 1910 and HP 2530.
+"""
+
+
 from exceptionz import DeviceError
 import netsnmp
 
