@@ -1,4 +1,4 @@
-from configuraster import Configuraster
+from ..configuraster import Configuraster
 from ipmi import IPMI
 from pdu import PDU
 from router import Router
