@@ -5,4 +5,4 @@ setup(name="ClusterTools",
       author="Georgiy Sgibnev",
       author_email="georgiy@sgibnev.com",
       url="http://git.devcloud.npdb/vp/testutil_hac",
-      packages=["cluster_devices"])
+      packages=["cluster_tools", "cluster_tools.devices"])
