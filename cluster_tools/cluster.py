@@ -12,11 +12,14 @@ class Node(object):
         if (const.node_state.OFF == self.state):
             self.ip = None
         else:
+            # TODO: hmmmmmmmmmmmmmmmmmmmmmm...
             self.ip = socket.gethostbyname(self.id)
 
 
-    def set_standby_mode(self, standby_mode_enabled):
-        self._cib.set_standby_mode(self.id, standby_mode_enabled)
+    def enable_standby_mode(self):
+        self._cib.enable_standby_mode(self.id)
+    def cancel_standby_mode(self):
+        self._cib.cancel_standby_mode(self.id)
 
 
     def __str__(self):
@@ -57,8 +60,8 @@ class Resource(BaseResource):
         self._cib = cib
         self.id = resource_id
         self.type = resource_type
-        self.state = cib.get_resource_states(resource_id)
-        self._priority_node = self._cib.get_priority_node(self.id)
+        self.state = cib.get_resource_state(resource_id)
+        #self._priority_node = self._cib.get_priority_node(self.id)
 
 
     def cleanup(self):
@@ -79,7 +82,7 @@ class Group(BaseResource):
         self._priority_node = self._cib.get_priority_node(self.id)
 
         self._resources = {}
-        children_ids = cib.get_subresources(self.id)
+        children_ids = cib.get_children(self.id)
         for child_id in children_ids:
             child_type = cib.get_resource_type(child_id)
             self._resources[child_id] = Resource(child_id, child_type, cib)

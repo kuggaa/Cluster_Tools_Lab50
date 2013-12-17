@@ -29,25 +29,6 @@ class CIB(object):
     STOPPED_ROLE = "Stopped"
 
 
-    @staticmethod
-    def _set_target_role_attr(resource_xml, val):
-        attr_xml = resource_xml.find(CIB.TARGET_ROLE_ATTR_XPATH)
-        if (attr_xml is None):
-            attrs_xml = resource_xml.find(CIB.ATTRS_XPATH)
-            assert(attrs_xml is not None, "WTF? Where is meta_attributes element?")
-            attr_xml = SubEl(attrs_xml, CIB.ATTR_TAG, {"name": "target-role"})
-            attr_xml.set("id", attrs_xml.get("id") + "-target-role")
-        attr_xml.set("value", val)
-
-
-    @staticmethod
-    def _remove_target_role_attr(resource_xml):
-        attr_xml = resource_xml.find(CIB.TARGET_ROLE_ATTR_XPATH)
-        if (attr_xml is not None):
-            attrs_xml = resource_xml.find(CIB.ATTRS_XPATH)
-            attrs_xml.remove(attr_xml)
-
-
     # Creates new child in "cib/configuration/resources" el (param `resources_xml`).
     # Returns created element.
     # It will have 1 child: attributes container.
@@ -85,8 +66,11 @@ class CIB(object):
         return self._communicator.get_node_state(node_id)
 
 
-    def set_standby_mode(self, node_name, standby_mode_enabled):
-        self._communicator.set_standby_mode(node_name, standby_mode_enabled)
+    def enable_standby_mode(self, node_id):
+        self._communicator.enable_standby_mode(node_id)
+
+    def disable_standby_mode(self, node_id):
+        self._communicator.disable_standby_mode(node_id)
 
 
     # Returns list of names.
@@ -95,7 +79,7 @@ class CIB(object):
 
 
     # Returns list of ids.
-    def get_subresources(self, group_id):
+    def get_children(self, group_id):
         xpath = "./configuration/resources/group[@id='%s']/primitive" % (group_id)
         resources_xml = self._cib_xml.findall(xpath)
         return [res.get("id") for res in resources_xml]
@@ -142,7 +126,7 @@ class CIB(object):
 
 
     # Do not use for groups!
-    def get_resource_states(self, resource_id):
+    def get_resource_state(self, resource_id):
         state = self._communicator.get_resource_state(resource_id)
         # Check ongoing operations.
         for op_xml in self._cib_xml.findall(CIB.ALL_RESOURCE_ONGOING_OPS_XPATH % (resource_id)):
@@ -156,26 +140,25 @@ class CIB(object):
 
 
     def _modify_target_role(self, resource_id, target_role):
-        resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
-        if (resource_xml is None):
-            return
-        if ("group" == resource_xml.tag):
-            for child_resource_xml in resource_xml.findall("./" + CIB.RESOURCE_TAG):
-                CIB._remove_target_role_attr(child_resource_xml)
-        CIB._set_target_role_attr(resource_xml, target_role)
-        self._communicator.modify(resource_xml)
-
+        resource_type = self.get_resource_type(resource_id)
+        # Update group's children.
+        if (const.resource_type.GROUP == resource_type):
+            for child_id in self.get_children(resource_id):
+                self._communicator.modify_attr(child_id, "target-role", target_role)
+        self._communicator.modify_attr(resource_id, "target-role", target_role)
 
     def start(self, resource_id):
-        self._modify_target_role(resource_id, "Started")
+        self._modify_target_role(resource_id, CIB.STARTED_ROLE)
+
     def stop(self, resource_id):
-        self._modify_target_role(resource_id, "Stopped")
+        self._modify_target_role(resource_id, CIB.STOPPED_ROLE)
 
 
     def manage(self, resource_id):
-        self._communicator.modify_managed_attr(resource_id, True)
+        self._communicator.modify_attr(resource_id, "is-managed", "true")
+
     def unmanage(self, resource_id):
-        self._communicator.modify_managed_attr(resource_id, False)
+        self._communicator.modify_attr(resource_id, "is-managed", "false")
 
 
     def migrate_resource(self, resource_id, node_id):

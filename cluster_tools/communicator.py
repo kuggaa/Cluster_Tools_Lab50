@@ -16,6 +16,9 @@ password = "user"
 
 
 class Communicator(object):
+    STANDBY_MODE_CMD = "crm_attribute\nnodes\nset\nstandby\n%s\n%s\n\n"
+
+
     def __init__(self):
         self._connected = False
     def __del__(self):
@@ -76,10 +79,11 @@ class Communicator(object):
             return const.node_state.ON
 
 
-    def set_standby_mode(self, node_id, standby_mode_enabled):
-        cmd = "crm_attribute\nnodes\nset\nstandby\n%s\n%s\n\n"
-        state_str = "on" if (standby_mode_enabled) else "off"
-        return self._perform_cmd(cmd % (state_str, node_id))
+    def enable_standby_mode(self, node_id):
+        self._perform_cmd(Comminicator.STANDBY_MODE_CMD % ("on", node_id))
+
+    def disable_standby_mode(self, node_id):
+        self._perform_cmd(Comminicator.STANDBY_MODE_CMD % ("off", node_id))
 
 
     # Result is a list of nodes ids.
@@ -103,9 +107,8 @@ class Communicator(object):
             assert(False, "Unknown state.")
 
 
-    def modify_managed_attr(self, resource_id, is_managed):
-        state_str = "true" if (is_managed) else "false"
-        cmd = "set_rsc_attr\n%s\nmeta\nis-managed\n%s" % (resource_id, state_str)
+    def modify_attr(self, resource_id, attr, val):
+        cmd = "set_rsc_attr\n%s\nmeta\n%s\n%s" % (resource_id, attr, val)
         self._perform_cmd(cmd)
 
 
@@ -121,7 +124,7 @@ class Communicator(object):
 
 
     def migrate_resource(self, resource_id, node_id):
-        cmd = "migrate\n%s\n%s\nfalse\n" % (resource_name, node_name)
+        cmd = "migrate\n%s\n%s\nfalse\n" % (resource_id, node_id)
         self._perform_cmd(cmd)
 
 
