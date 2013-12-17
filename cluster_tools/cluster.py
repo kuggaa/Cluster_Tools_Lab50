@@ -60,7 +60,11 @@ class Resource(BaseResource):
         self._cib = cib
         self.id = resource_id
         self.type = resource_type
-        self.state = cib.get_resource_state(resource_id)
+        self.state = cib.get_resource_state(self.id)
+        if (const.resource_state.ON == self.state):
+            self.nodes_ids = cib.get_resource_nodes(self.id)
+        else:
+            self.nodes_ids = []
         #self._priority_node = self._cib.get_priority_node(self.id)
 
 

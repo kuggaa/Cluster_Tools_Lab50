@@ -139,6 +139,11 @@ class CIB(object):
         return state
 
 
+    # Do not use for groups.
+    def get_resource_nodes(self, resource_id):
+        return self._communicator.get_resource_nodes(resource_id)
+
+
     def _modify_target_role(self, resource_id, target_role):
         resource_type = self.get_resource_type(resource_id)
         # Update group's children.

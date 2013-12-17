@@ -52,11 +52,13 @@ class Communicator(object):
         if (response is None):
             print("OH SHI~")
             return []
-        response_list = string.split(response, "\n")
-        if ("o" != response_list[0]):
-            print("OH SHI~")
-            return []
-        return response_list[1:]
+        else:
+            response_list = string.split(response, "\n")
+            if ("o" != response_list[0]):
+                err_msg = response_list[1] if (len(response_list) > 0) else None
+                print(err_msg)
+                raise "OLOLO"
+            return response_list[1:]
 
 
     def get_cib(self):
@@ -104,7 +106,7 @@ class Communicator(object):
         elif ("running" in state):
             return const.resource_state.ON
         else:
-            assert(False, "Unknown state.")
+            assert(False, "Unknown state: %s." % (state))
 
 
     def modify_attr(self, resource_id, attr, val):
