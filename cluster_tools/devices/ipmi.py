@@ -3,8 +3,7 @@ IPMI device.
 Just a wrap for ipmitool.
 """
 
-
-from exceptionz import DeviceError
+from ..exceptions import DeviceError
 import os
 import subprocess
 

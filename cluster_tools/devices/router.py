@@ -4,8 +4,7 @@ Just a wrap for netsnmp.
 Tested on HP 1910 and HP 2530.
 """
 
-
-from exceptionz import DeviceError
+from ..exceptions import DeviceError
 import netsnmp
 
 

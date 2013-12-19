@@ -1,4 +1,9 @@
-from exceptionz import DeviceError
+"""
+PDU device.
+Tested on APC AP7920.
+"""
+
+from ..exceptions import DeviceError
 import netsnmp
 
 

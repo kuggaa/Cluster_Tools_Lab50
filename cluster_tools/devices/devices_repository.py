@@ -21,7 +21,7 @@ class DevicesRepository(object):
         if (pdu_required):
             self._load_pdu_devices()
         if (routers_required):
-            self._routers()
+            self._load_routers()
 
 
     def _load_ipmi_devices(self):
