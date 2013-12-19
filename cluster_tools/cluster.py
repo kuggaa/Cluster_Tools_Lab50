@@ -1,8 +1,6 @@
 import const
 from cib import CIB
-
 import socket
-from application import settings
 
 
 class Node(object):
