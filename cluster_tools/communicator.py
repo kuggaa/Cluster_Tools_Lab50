@@ -1,26 +1,27 @@
-import sys
-sys.path.append("/usr/share/heartbeat-gui")
-sys.path.append("/usr/lib/heartbeat-gui")
-
 import const
 import xml.etree.ElementTree as ET
 import socket
-from pymgmt import *
-import string
+import ssl
 
 server_addr = "astra-cluster-1"
 password = "user"
 
-#server_addr = "neptune"
-#password = "password"
+
+class CommunicatorError(Exception):
+    pass
 
 
 class Communicator(object):
+    SUCCESS = "o"
+    MGMT_PROTOCOL_VER = "2.1"
+    LOGIN_CMD = "login\n%s\n%s\n%s"
     STANDBY_MODE_CMD = "crm_attribute\nnodes\nset\nstandby\n%s\n%s\n\n"
 
 
     def __init__(self):
         self._connected = False
+        self._sock = None
+
     def __del__(self):
         self.disconnect()
 
@@ -29,32 +30,52 @@ class Communicator(object):
         return self._connected
 
 
-    def connect(self, server_addr=server_addr, password=password, user_name="user", port=""):
+    def connect(self, server_addr=server_addr, login="user", password=password, port=5560, timeout=3.0):
         assert(not self._connected)
-        server_ip = socket.gethostbyname(server_addr)
-        result = mgmt_connect(server_ip, user_name, password, port)
-        if (0 != result):
-            print("No connect =(")
-            return
+        self._sock = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM),
+                                     ssl_version=ssl.PROTOCOL_TLSv1,
+                                     ciphers="HIGH:+ADH",
+                                     do_handshake_on_connect=True)
+        self._sock.settimeout(timeout)
         self._connected = True
+        self._sock.connect((server_addr, port))
+
+        login_cmd = Communicator.LOGIN_CMD % (login,
+                                              password,
+                                              Communicator.MGMT_PROTOCOL_VER)
+        result = self._communicate(login_cmd)
+        if (Communicator.SUCCESS != result):
+            print("No connect =(")
+            self.disconnect()
 
 
     def disconnect(self):
         if (not self._connected):
             return
-        mgmt_disconnect()
+        self._sock.close()
         self._connected = False
 
 
-    def _perform_cmd(self, cmd):
+    def _communicate(self, cmd):
         assert(self._connected)
-        response = mgmt_sendmsg(cmd)
+        self._sock.write(cmd + b'\x00')
+        response = ""
+        while True:
+            response += self._sock.read()
+            if (len(response) > 0) and (response[-1] == b'\x00'):
+                break
+        return response.strip(b'\x00')
+
+
+    def _perform_cmd(self, cmd):
+        """ Wrap around _communicate() method. """
+        response = self._communicate(cmd)
         if (response is None):
             print("OH SHI~")
             return []
         else:
-            response_list = string.split(response, "\n")
-            if ("o" != response_list[0]):
+            response_list = response.split("\n")
+            if (Communicator.SUCCESS != response_list[0]):
                 print(response)
                 if (len(response_list) > 1):
                     err_msg = response_list[1]
@@ -64,8 +85,8 @@ class Communicator(object):
 
 
     def get_cib(self):
-        response_str = mgmt_sendmsg("cib_query\ncib")[2:]
-        return ET.fromstring(response_str)
+        response = self._perform_cmd("cib_query\ncib")
+        return ET.fromstring("".join(response))
 
 
     def get_node_state(self, node_id):
@@ -108,7 +129,7 @@ class Communicator(object):
         elif ("running" in state):
             return const.resource_state.ON
         else:
-            assert(False, "Unknown state: %s." % (state))
+            assert(False), "Unknown state: %s." % (state)
 
 
     def modify_attr(self, resource_id, attr, val):
