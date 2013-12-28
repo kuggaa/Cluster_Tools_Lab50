@@ -21,7 +21,7 @@ class Node(object):
 
 
     def __str__(self):
-        return "[%s] %s" % (node_state.to_str(self.state), self.id)
+        return "[%s] %s" % (const.node_state.to_str(self.state), self.id)
     def __repr__(self):
         return self.__str__()
 
@@ -136,8 +136,8 @@ def build_resource(resource_id, cib):
 
 
 class Cluster(object):
-    def __init__(self):
-        self._cib = CIB()
+    def __init__(self, host):
+        self._cib = CIB(host)
 
 
     def update(self):

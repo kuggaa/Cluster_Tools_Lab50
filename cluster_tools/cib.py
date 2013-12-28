@@ -47,9 +47,9 @@ class CIB(object):
         return resource_xml
 
 
-    def __init__(self):
+    def __init__(self, host):
         self._communicator = Communicator()
-        self._communicator.connect()
+        self._communicator.connect(host=host)
         self._cib_xml = None
 
 
