@@ -31,9 +31,9 @@ class DevicesRepository(object):
     def get_ipmi(self, ipmi_id):
         return self._ipmi_devices.get(ipmi_id, None)
 
-    def get_ipmi_for_node(self, node):
+    def get_ipmi_for_node(self, node_id):
         for ipmi in self._ipmi_devices.values():
-            if (ipmi.node_id == node.id):
+            if (ipmi.node_id == node_id):
                 return ipmi
         return None
 

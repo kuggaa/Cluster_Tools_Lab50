@@ -186,5 +186,9 @@ class Cluster(object):
 
     def create_dummy(self, id, started=True):
         self._cib.create_dummy(id, started)
-    def create_group(self, id, children_ids, started=True):
-        self._cib.create_group(id, children_ids, started)
+
+    def create_group(self, group_id, children_ids, started=True):
+        self._cib.create_group(group_id, children_ids, started)
+
+    def move_resources_to_group(self, group_id, resources_ids):
+        self._cib.move_resources_to_group(group_id, resources_ids)

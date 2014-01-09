@@ -10,6 +10,7 @@ class CIB(object):
     ALL_ROOT_RESOURCES_XPATH = "./configuration/resources/*"
     RESOURCES_XPATH = "./configuration/resources"
     RESOURCE_XPATH = "./configuration/resources//*[@id='%s']"
+    GROUP_XPATH = "./configuration/resources/group[@id='%s']"
     ALL_RESOURCE_ONGOING_OPS_XPATH = "./status/node_state/lrm/lrm_resources/lrm_resource[@id='%s']/lrm_rsc_op[@op-status='-1']"
     CONSTRAINTS_XPATH = "./configuration/constraints"
     LOC_CONSTRAINT_XPATH = "./configuration/constraints/rsc_location[@rsc='%s']"
@@ -95,10 +96,10 @@ class CIB(object):
         self._communicator.modify(resources_xml)
 
 
-    def create_group(self, id, children_ids, started):
+    def create_group(self, group_id, children_ids, started):
         resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
         assert(resources_xml is not None)
-        group_xml = CIB._create_resource(resources_xml, id, CIB.GROUP_TAG, started)
+        group_xml = CIB._create_resource(resources_xml, group_id, CIB.GROUP_TAG, started)
 
         # TODO: do something with remove stuff.
         for child_id in children_ids:
@@ -108,6 +109,27 @@ class CIB(object):
             resources_xml.remove(child_xml)
             group_xml.append(child_xml)
 
+        self._communicator.modify(resources_xml)
+
+
+    def move_resources_to_group(self, group_id, resources_ids):
+        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
+        target_group_xml = self._cib_xml.find(CIB.GROUP_XPATH % (group_id))
+
+        root_resources_ids = self.get_root_resources()
+        for resource_id in resources_ids:
+            resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
+            # Process root resource.
+            if (resource_id in root_resources_ids):
+                resources_xml.remove(resource_xml)
+            # Process child resource.
+            else:
+                group_xml = self._cib_xml.find("./configuration/resources/group/primitive[id='%s']")
+                group_xml.remove(resource_xml)
+                # Remove group from cib if necessary.
+                if (True):
+                    resources_xml.remove(group_xml)
+            target_group_xml.append(resource_xml)
         self._communicator.modify(resources_xml)
 
 
