@@ -30,6 +30,22 @@ class CIB(object):
     STOPPED_ROLE = "Stopped"
 
 
+    @staticmethod
+    def _get_group_children_qty(group_xml):
+        children_qty = 0
+        for sub_xml in group_xml:
+            if (CIB.RESOURCE_TAG == sub_xml.tag):
+                children_qty += 1
+        return children_qty
+
+    # Returns group element or None if this is root resource.
+    @staticmethod
+    def _get_group_of_resource(resources_xml, resource_xml):
+        if (resource_xml in resources_xml):
+            return None
+        return resources_xml.find("./group/primitive[@id='%s']/.." % (resource_xml.get("id")))
+
+
     # Creates new child in "cib/configuration/resources" el (param `resources_xml`).
     # Returns created element.
     # It will have 1 child: attributes container.
@@ -127,7 +143,7 @@ class CIB(object):
                 group_xml = self._cib_xml.find("./configuration/resources/group/primitive[id='%s']")
                 group_xml.remove(resource_xml)
                 # Remove group from cib if necessary.
-                if (True):
+                if (CIB._is_group_empty(group_xml)):
                     resources_xml.remove(group_xml)
             target_group_xml.append(resource_xml)
         self._communicator.modify(resources_xml)
@@ -229,8 +245,29 @@ class CIB(object):
             self._communicator.cleanup(resource_id, node_id)
 
 
+    # Send remove command via self._communicator and delete element from CIB.
     def remove_resource(self, resource_id):
+        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
         resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
         if (resource_xml is None):
             return
-        self._communicator.remove_resource(resource_xml)
+
+        # Process group.
+        if (CIB.GROUP_TAG == resource_xml.tag):
+            self._communicator.remove_resource(resource_xml)
+            resources_xml.remove(resource_xml)
+        # Process primitive resource.
+        else:
+            group_xml = CIB._get_group_of_resource(resources_xml, resource_xml)
+            # Process root primitive resource.
+            if (group_xml is None):
+                self._communicator.remove_resource(resource_xml)
+                resources_xml.remove(resource_xml)
+            # Process child primitive resource.
+            else:
+                if (1 == CIB._get_group_children_qty(group_xml)):
+                    self._communicator.remove_resource(group_xml)
+                    resources_xml.remove(group_xml)
+                else:
+                    self._communicator.remove_resource(resource_xml)
+                    group_xml.remove(resource_xml)
