@@ -86,8 +86,8 @@ class CIB(object):
     def enable_standby_mode(self, node_id):
         self._communicator.enable_standby_mode(node_id)
 
-    def disable_standby_mode(self, node_id):
-        self._communicator.disable_standby_mode(node_id)
+    def cancel_standby_mode(self, node_id):
+        self._communicator.cancel_standby_mode(node_id)
 
 
     # Returns list of names.

@@ -105,10 +105,10 @@ class Communicator(object):
 
 
     def enable_standby_mode(self, node_id):
-        self._perform_cmd(Comminicator.STANDBY_MODE_CMD % ("on", node_id))
+        self._perform_cmd(Communicator.STANDBY_MODE_CMD % ("on", node_id))
 
-    def disable_standby_mode(self, node_id):
-        self._perform_cmd(Comminicator.STANDBY_MODE_CMD % ("off", node_id))
+    def cancel_standby_mode(self, node_id):
+        self._perform_cmd(Communicator.STANDBY_MODE_CMD % ("off", node_id))
 
 
     # Result is a list of nodes ids.

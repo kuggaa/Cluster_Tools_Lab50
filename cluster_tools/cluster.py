@@ -5,6 +5,7 @@ import socket
 
 class Node(object):
     def __init__(self, node_id, cib):
+        self._cib = cib
         self.id = node_id
         self.state = cib.get_node_state(node_id)
         if (const.node_state.OFF == self.state):
