@@ -4,7 +4,15 @@ import ConfigParser
 class Configuraster(object):
     def __init__(self, config_files):
         self._config = ConfigParser.ConfigParser()
-        self._config.read(config_files)
+        if (0 == len(self._config.read(config_files))):
+            raise "conf fail =("
+
+
+    def get_section(self, section):
+        params = {}
+        for param, val in self._config.items(section):
+            params[param] = val
+        return params
 
 
     def get_sections_by_prefix(self, required_prefix):
@@ -15,5 +23,5 @@ class Configuraster(object):
 
             settings = {}
             for param, val in self._config.items(section):
-                settings[param] = val 
+                settings[param] = val
             yield id, settings
