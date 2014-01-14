@@ -128,27 +128,6 @@ class CIB(object):
         self._communicator.modify(resources_xml)
 
 
-    def move_resources_to_group(self, group_id, resources_ids):
-        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
-        target_group_xml = self._cib_xml.find(CIB.GROUP_XPATH % (group_id))
-
-        root_resources_ids = self.get_root_resources()
-        for resource_id in resources_ids:
-            resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
-            # Process root resource.
-            if (resource_id in root_resources_ids):
-                resources_xml.remove(resource_xml)
-            # Process child resource.
-            else:
-                group_xml = self._cib_xml.find("./configuration/resources/group/primitive[id='%s']")
-                group_xml.remove(resource_xml)
-                # Remove group from cib if necessary.
-                if (CIB._is_group_empty(group_xml)):
-                    resources_xml.remove(group_xml)
-            target_group_xml.append(resource_xml)
-        self._communicator.modify(resources_xml)
-
-
     # Returns None in case of fail.
     def get_resource_type(self, resource_id):
         resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
@@ -243,6 +222,41 @@ class CIB(object):
         nodes_ids = self.get_nodes()
         for node_id in nodes_ids:
             self._communicator.cleanup(resource_id, node_id)
+
+
+    def set_group(self, resource_id, group_id):
+        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
+        resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
+        target_group_xml = self._cib_xml.find(CIB.GROUP_XPATH % (group_id))
+
+        current_group_xml = CIB._get_group_of_resource(resources_xml, resource_xml)
+        if (current_group_xml is None):
+            resources_xml.remove(resource_xml)
+        else:
+            current_group_xml.remove(resource_xml)
+            # Remove the group if necessary.
+            if (0 == CIB._get_group_children_qty(current_group_xml)):
+                resources_xml.remove(current_group_xml)
+
+        target_group_xml.append(resource_xml)
+        self._communicator.modify(resources_xml)
+
+
+    def move_to_root(self, resource_id):
+        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
+        resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
+        group_xml = CIB._get_group_of_resource(resources_xml, resource_xml)
+        if (group_xml is None):
+            return
+
+        # Move the resource to the root.
+        group_xml.remove(resource_xml)
+        resources_xml.append(resource_xml)
+        # Remove the group if necessary.
+        if (0 == CIB._get_group_children_qty(group_xml)):
+            resources_xml.remove(group_xml)
+        # Save.
+        self._communicator.modify(resources_xml)
 
 
     # Send remove command via self._communicator and delete element from CIB.

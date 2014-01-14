@@ -70,11 +70,16 @@ class Resource(BaseResource):
     def cleanup(self):
         self._cib.cleanup(self.id)
 
+    def set_group(self, group):
+        self._cib.set_group(self.id, group.id)
+
+    def move_to_root(self):
+        self._cib.move_to_root(self.id)
 
     def __str__(self):
-        return "OLOLO " + self.id
+        return "Resource " + self.id
     def __repr__(self):
-        return "OLOLO " + self.id
+        return "Resource " + self.id
 
 
 class Group(BaseResource):
@@ -111,10 +116,11 @@ class Group(BaseResource):
         for resource in self._resources.values():
             yield resource
 
-
     def get_resource(self, resource_id):
         return self._resources.get(resource_id, None)
 
+    def get_resources_qty(self):
+        return len(self._resources)
 
     def set_running_state(self, resource_is_running):
         for resource in self._resources.values():
