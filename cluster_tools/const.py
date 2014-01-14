@@ -61,9 +61,11 @@ class resource_state(object):
 
 
 class actions(object):
-    GET_NODES_LIST = "can_get_nodes_list"
-    MANAGE_NODE = "can_manage_node"
-    GET_RESOURCE_TIMEOUTS = "can_get_resource_timeouts"
+    SEE_NODES = "can_see_nodes"
+    CONTROL_NODES = "can_control_nodes"
+
+    SEE_RESOURCES = "can_see_resources"
+    SEE_RESOURCES_TIMEOUTS = "can_see_resources_timeouts"
     CREATE_RESOURCE = "can_create_resource"
-    MANAGE_RESOURCE = "can_manage_resource"
+    CONTROL_RESOURCES = "can_control_resources"
     OPEN_VM_CONSOLE = "can_open_vm_console"
