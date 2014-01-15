@@ -183,6 +183,7 @@ class CIB(object):
         self._communicator.modify_attr(resource_id, "is-managed", "false")
 
     def migrate_resource(self, resource_id, node_id):
+        self.remove_loc_constraints(resource_id)
         self._communicator.migrate_resource(resource_id, node_id)
 
     def get_loc_constraints(self, id):
@@ -207,7 +208,7 @@ class CIB(object):
                  "score": "+INFINITY",
                  "id": "%s-location" % (resource_id)}
         SubEl(constraints_xml, CIB.LOC_CONSTRAINT_TAG, attrs)
-        self._communicator.update_constraints(constraints_xml)
+        self._communicator.modify(constraints_xml)
 
     def remove_loc_constraints(self, id):
         """ Remove all location constraints of the resource. """
@@ -215,11 +216,6 @@ class CIB(object):
         for constr_xml in self._cib_xml.findall(CIB.LOC_CONSTRAINT_XPATH % (id)):
             self._communicator.remove_constraint(constr_xml)
             constraints_xml.remove(constr_xml)
-
-    # Returns name of node or None.
-    def get_priority_node(self, resource_name):
-        constraint_xml = self._cib_xml.find(CIB.LOC_CONSTRAINT_XPATH % (resource_name))
-        return None if (constraint_xml is None) else constraint_xml.get("node")
 
     def cleanup(self, resource_id):
         nodes_ids = self.get_nodes()
