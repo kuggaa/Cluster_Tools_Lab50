@@ -49,6 +49,9 @@ class BaseResource(object):
     def migrate(self, node):
         self._cib.migrate_resource(self.id, node.id)
 
+    def get_loc_constraints(self):
+        return self._cib.get_loc_constraints(self.id)
+
     def create_loc_constraint(self, node):
         self._cib.create_loc_constraint(self.id, node.id)
 
@@ -69,8 +72,7 @@ class Resource(BaseResource):
             self.nodes_ids = cib.get_resource_nodes(self.id)
         else:
             self.nodes_ids = []
-        #self._priority_node = self._cib.get_priority_node(self.id)
-
+  
 
     def cleanup(self):
         self._cib.cleanup(self.id)

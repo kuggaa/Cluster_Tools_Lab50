@@ -185,6 +185,20 @@ class CIB(object):
     def migrate_resource(self, resource_id, node_id):
         self._communicator.migrate_resource(resource_id, node_id)
 
+    def get_loc_constraints(self, id):
+        """ Returns nodes list. """
+        nodes_ids = []
+        for constr_xml in self._cib_xml.findall(CIB.LOC_CONSTRAINT_XPATH % (id)):
+            node_id = constr_xml.get("node")
+            if (node_id is None):
+                expr_xml = constr_xml.find("./rule/expression")
+                if (expr_xml is None) or (expr_xml.get("value") is None):
+                    continue
+                nodes_ids.append(expr_xml.get("value"))
+            else:
+                nodes_ids.append(node_id)
+        return nodes_ids
+
     def create_loc_constraint(self, resource_id, node_id):
         self.remove_loc_constraints(resource_id)
         constraints_xml = self._cib_xml.find(CIB.CONSTRAINTS_XPATH)
