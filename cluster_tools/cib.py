@@ -182,9 +182,13 @@ class CIB(object):
     def unmanage(self, resource_id):
         self._communicator.modify_attr(resource_id, "is-managed", "false")
 
-
     def migrate_resource(self, resource_id, node_id):
         self._communicator.migrate_resource(resource_id, node_id)
+
+    def remove_loc_constraints(self, id):
+        """ Remove all location constraints of the resource. """
+        for constr_xml in self._cib_xml.findall(CIB.LOC_CONSTRAINT_XPATH % (resource_id)):
+            self._communicator.remove_constraint(constr_xml)
 
 
     # Returns name of node or None.

@@ -30,25 +30,27 @@ class Node(object):
 class BaseResource(object):
     def start(self):
         self._cib.start(self.id)
+
     def stop(self):
         self._cib.stop(self.id)
 
-
     def set_priority_node(self, node):
         self._cib.set_priority_node(self.id, node.id)
+
     def unset_priority_node(self):
         self._cib.unset_priority_node(self.id)
 
-
     def manage(self):
         self._cib.manage(self.id)
+
     def unmanage(self):
         self._cib.unmanage(self.id)
-
 
     def migrate(self, node):
         self._cib.migrate_resource(self.id, node.id)
 
+    def remove_loc_constraints(self):
+        self._cib.remove_loc_constraints(self.id)
 
     def remove(self):
         self._cib.remove_resource(self.id)

@@ -60,7 +60,7 @@ class resource_state(object):
             assert(False and "bad state")
 
 
-class actions(object):
+class action(object):
     SEE_NODES = "can_see_nodes"
     CONTROL_NODES = "can_control_nodes"
 
