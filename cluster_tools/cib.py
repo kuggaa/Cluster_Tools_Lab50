@@ -185,42 +185,27 @@ class CIB(object):
     def migrate_resource(self, resource_id, node_id):
         self._communicator.migrate_resource(resource_id, node_id)
 
+    def create_loc_constraint(self, resource_id, node_id):
+        self.remove_loc_constraints(resource_id)
+        constraints_xml = self._cib_xml.find(CIB.CONSTRAINTS_XPATH)
+        attrs = {"rsc": resource_id,
+                 "node": node_id,
+                 "score": "+INFINITY",
+                 "id": "%s-location" % (resource_id)}
+        SubEl(constraints_xml, CIB.LOC_CONSTRAINT_TAG, attrs)
+        self._communicator.update_constraints(constraints_xml)
+
     def remove_loc_constraints(self, id):
         """ Remove all location constraints of the resource. """
-        for constr_xml in self._cib_xml.findall(CIB.LOC_CONSTRAINT_XPATH % (resource_id)):
+        constraints_xml = self._cib_xml.find(CIB.CONSTRAINTS_XPATH)
+        for constr_xml in self._cib_xml.findall(CIB.LOC_CONSTRAINT_XPATH % (id)):
             self._communicator.remove_constraint(constr_xml)
-
+            constraints_xml.remove(constr_xml)
 
     # Returns name of node or None.
     def get_priority_node(self, resource_name):
         constraint_xml = self._cib_xml.find(CIB.LOC_CONSTRAINT_XPATH % (resource_name))
         return None if (constraint_xml is None) else constraint_xml.get("node")
-
-
-    def set_priority_node(self, resource_name, node_name):
-        constraint_xml = self._cib_xml.find(CIB.LOC_CONSTRAINT_XPATH % (resource_name))
-        if (constraint_xml is not None) and (node_name == constraint_xml.get("node")):
-            return
-
-        constraints_xml = self._cib_xml.find(CIB.CONSTRAINTS_XPATH)
-        if (constraint_xml is None):
-            id = resource_name + "-location"
-            attrs = {"rsc": resource_name, "node": node_name, "score": "+INFINITY", "id": id}
-            constraint_xml = SubEl(constraints_xml, CIB.LOC_CONSTRAINT_TAG, attrs)
-        else:
-            constraint_xml.set("node", node_name)
-        self._communicator.update_constraints(constraints_xml)
-
-
-    def unset_priority_node(self, resource_name):
-        constraint_xml = self._cib_xml.find(CIB.LOC_CONSTRAINT_XPATH % (resource_name))
-        if (constraint_xml is None):
-            return
-
-        constraints_xml = self._cib_xml.find(CIB.CONSTRAINTS_XPATH)
-        constraints_xml.remove(constraint_xml)
-        self._communicator.update_constraints(constraints_xml)
-
 
     def cleanup(self, resource_id):
         nodes_ids = self.get_nodes()

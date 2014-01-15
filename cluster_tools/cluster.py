@@ -49,6 +49,9 @@ class BaseResource(object):
     def migrate(self, node):
         self._cib.migrate_resource(self.id, node.id)
 
+    def create_loc_constraint(self, node):
+        self._cib.create_loc_constraint(self.id, node.id)
+
     def remove_loc_constraints(self):
         self._cib.remove_loc_constraints(self.id)
 
