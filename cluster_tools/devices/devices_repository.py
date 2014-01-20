@@ -12,9 +12,9 @@ class DevicesRepository(object):
                  pdu_required=False,
                  routers_required=False):
         self._conf = Configuraster(infrastructure_conf)
-        self._ipmi_devices = {}
-        self._pdu_devices = {}
-        self._routers = {}
+        self.ipmi_devices = {}
+        self.pdu_devices = {}
+        self.routers = {}
 
         if (ipmi_required):
             self._load_ipmi_devices()
@@ -25,31 +25,33 @@ class DevicesRepository(object):
 
 
     def _load_ipmi_devices(self):
+        self.ipmi_devices = {}
         for id, settings in self._conf.get_sections_by_prefix("ipmi"):
-            self._ipmi_devices[id] = IPMI(id, settings)
+            self.ipmi_devices[id] = IPMI(id, settings)
 
     def get_ipmi(self, ipmi_id):
-        return self._ipmi_devices.get(ipmi_id, None)
+        return self.ipmi_devices.get(ipmi_id, None)
 
     def get_ipmi_for_node(self, node_id):
-        for ipmi in self._ipmi_devices.values():
+        for ipmi in self.ipmi_devices.values():
             if (ipmi.node_id == node_id):
                 return ipmi
         return None
 
 
     def _load_pdu_devices(self):
-        self._pdu_devices = {}
+        self.pdu_devices = {}
         for id, settings in self._conf.get_sections_by_prefix("pdu"):
-            self._pdu_devices[id] = PDU(id, settings)
+            self.pdu_devices[id] = PDU(id, settings)
 
     def get_pdu(self, pdu_id):
-        return self._pdu_devices.get(pdu_id, None)
+        return self.pdu_devices.get(pdu_id, None)
 
 
     def _load_routers(self):
+        self.routers = {}
         for id, settings in self._conf.get_sections_by_prefix("router"):
-            self._routers[id] = Router(id, settings)
+            self.routers[id] = Router(id, settings)
 
     def get_router(self, router_id):
-        return self._routers.get(router_id, None)
+        return self.routers.get(router_id, None)

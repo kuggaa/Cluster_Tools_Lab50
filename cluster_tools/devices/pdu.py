@@ -34,6 +34,10 @@ class PDU(object):
             raise DeviceError(self.id)
 
 
+    def is_connected(self, device):
+        return (device.id in self._outlets)
+
+
     def off(self, device):
         outlet = self._outlets.get(device.id, None)
         if (outlet is None):
