@@ -34,12 +34,6 @@ class BaseResource(object):
     def stop(self):
         self._cib.stop(self.id)
 
-    def set_priority_node(self, node):
-        self._cib.set_priority_node(self.id, node.id)
-
-    def unset_priority_node(self):
-        self._cib.unset_priority_node(self.id)
-
     def manage(self):
         self._cib.manage(self.id)
 
@@ -94,7 +88,6 @@ class Group(BaseResource):
         self._cib = cib
         self.id = group_id
         self.type = const.resource_type.GROUP
-        self._priority_node = self._cib.get_priority_node(self.id)
 
         self._resources = {}
         children_ids = cib.get_children(self.id)
