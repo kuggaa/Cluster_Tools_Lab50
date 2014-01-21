@@ -1,6 +1,8 @@
 import const
 from cib import CIB
+
 import socket
+import subprocess
 
 
 class Node(object):
@@ -83,6 +85,18 @@ class Resource(BaseResource):
         return "Resource " + self.id
 
 
+class VM(Resource):
+    def __init__(self, resource_id, cib):
+        Resource.__init__(self, resource_id, const.resource_type.VM, cib)
+
+    def get_vnc_id(self):
+        p = subprocess.Popen(["virsh", "-c", "qemu+tcp://astra-cluster-1/system", "vncdisplay", "test"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if (len(err) > 0):
+            raise "OLOLO"
+        return int(out.strip().replace(":", ""))
+
+
 class Group(BaseResource):
     def __init__(self, group_id, cib):
         self._cib = cib
@@ -138,6 +152,8 @@ def build_resource(resource_id, cib):
     resource_type = cib.get_resource_type(resource_id)
     if (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
+    elif (const.resource_type.VM == resource_type):
+        return VM(resource_id, cib)
     else:
         return Resource(resource_id, resource_type, cib)
 
