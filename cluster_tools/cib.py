@@ -137,7 +137,14 @@ class CIB(object):
         if ("group" == resource_xml.tag):
             return const.resource_type.GROUP
         elif ("primitive" == resource_xml.tag):
-            return const.resource_type.DUMMY
+            # TODO: govnocode.
+            primitive_type = resource_xml.get("type")
+            if ("IPaddr" == primitive_type):
+                return const.resource_type.IP
+            elif ("VirtualDomain" == primitive_type):
+                return const.resource_type.VM
+            elif ("Dummy" == primitive_type):
+                return const.resource_type.DUMMY
         else:
             return None
 

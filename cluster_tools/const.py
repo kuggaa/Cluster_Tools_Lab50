@@ -20,6 +20,7 @@ class resource_type(object):
     VM = 2
     GLUSTER_FS = 3
     DUMMY = 4
+    IP = 5
 
     @staticmethod
     def to_str(res_type):
@@ -31,6 +32,8 @@ class resource_type(object):
             return "GlusterFS"
         elif (resource_type.DUMMY == res_type):
             return "Dummy"
+        elif (resource_type.IP == res_type):
+            return "IP"
         else:
             assert(False and "bad type")
 
