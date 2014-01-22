@@ -90,7 +90,21 @@ class VM(Resource):
         Resource.__init__(self, resource_id, const.resource_type.VM, cib)
 
     def get_vnc_id(self):
-        p = subprocess.Popen(["virsh", "-c", "qemu+tcp://astra-cluster-1/system", "vncdisplay", "test"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Get VM name.
+        conf_path = self._cib.get_attr_val(self.id, "config")
+        splitted_conf_path = conf_path.rsplit("/", 1)
+        if (2 != len(splitted_conf_path)):
+            raise "OLOLO"
+        vm_name = splitted_conf_path[1].replace(".xml", "")
+
+        # Get VNC id.
+        p = subprocess.Popen(args=["virsh",
+                                   "-c",
+                                   "qemu+tcp://astra-cluster-1/system",
+                                   "vncdisplay",
+                                   vm_name],
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         out, err = p.communicate()
         if (len(err) > 0):
             raise "OLOLO"

@@ -38,6 +38,7 @@ class CIB(object):
                 children_qty += 1
         return children_qty
 
+
     # Returns group element or None if this is root resource.
     @staticmethod
     def _get_group_of_resource(resources_xml, resource_xml):
@@ -62,6 +63,11 @@ class CIB(object):
         role_xml.set("id", attrs_xml.get("id") + "-target-role")
         role_xml.set("value", CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE)
         return resource_xml
+
+
+    def get_attr_val(self, resource_id, attr_name):
+        XPATH = "./configuration/resources//*[@id='%s']/instance_attributes/nvpair[@name='%s']"
+        return self._cib_xml.find(XPATH % (resource_id, attr_name)).get("value")
 
 
     def __init__(self, host):
