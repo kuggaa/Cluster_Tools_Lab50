@@ -135,7 +135,7 @@ class CIB(object):
         CIB._add_resource_el(parent_el=resources_el,
                              id=id,
                              cls="ocf",
-                             provider="pacemaker",
+                             provider="heartbeat",
                              type="VirtualDomain",
                              started=True,
                              attrs={
