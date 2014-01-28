@@ -33,7 +33,7 @@ class CIB(object):
 
     # Accessory method for _add_meta_attrs_el() and _add_instance_attrs_el().
     @staticmethod
-    def _add_attrs_el(self, parent_el, tag, attrs):
+    def _add_attrs_el(parent_el, tag, attrs):
         id = parent_el.get("id") + "-" + tag
         attrs_el = SubEl(parent_el, tag, {"id": id})
         for attr_name, attr_val in attrs.iteritems():
@@ -44,18 +44,18 @@ class CIB(object):
 
 
     @staticmethod
-    def _add_meta_attrs_el(self, parent_el, started):
+    def _add_meta_attrs_el(parent_el, started):
         role = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
         return CIB._add_attrs_el(parent_el, CIB.META_ATTRS_TAG, {"target-role": role})
 
 
     @staticmethod
-    def _add_instance_attrs_el(self, parent_el, attrs):
+    def _add_instance_attrs_el(parent_el, attrs):
         return CIB._add_attrs_el(parent_el, CIB.INSTANCE_ATTRS_TAG, attrs)
 
 
     @staticmethod
-    def _add_resorce_el(self, parent_el, id, cls, provider, type, started, atrrs=None):
+    def _add_resource_el(parent_el, id, cls, provider, type, started, atrrs=None):
         resource_el = SubEl(parent_el, "primitive", {"id": id,
                                                      "class": cls,
                                                      "provider": provider,
@@ -80,7 +80,6 @@ class CIB(object):
         if (resource_xml in resources_xml):
             return None
         return resources_xml.find("./group/primitive[@id='%s']/.." % (resource_xml.get("id")))
-
 
 
 
@@ -133,26 +132,26 @@ class CIB(object):
 
     def create_vm(self, id, conf_file_path):
         resources_el = self._get_resources_el()
-        CIB._add_resorce_el(parent_el=resources_el,
-                            id=id,
-                            cls="ocf",
-                            provider="pacemaker",
-                            type="VirtualDomain",
-                            started=True,
-                            atrrs={
-                                "config": conf_file_path,
-                                "hypervisor": "qemu:///system"})
+        CIB._add_resource_el(parent_el=resources_el,
+                             id=id,
+                             cls="ocf",
+                             provider="pacemaker",
+                             type="VirtualDomain",
+                             started=True,
+                             atrrs={
+                                 "config": conf_file_path,
+                                 "hypervisor": "qemu:///system"})
         self._communicator.modify(resources_el)
 
 
     def create_dummy(self, id, started):
         resources_el = self._get_resources_el()
-        CIB._add_resorce_el(parent_el=resources_el,
-                            id=id,
-                            cls="ocf",
-                            provider="pacemaker",
-                            type="Dummy",
-                            started=started)
+        CIB._add_resource_el(parent_el=resources_el,
+                             id=id,
+                             cls="ocf",
+                             provider="pacemaker",
+                             type="Dummy",
+                             started=started)
         self._communicator.modify(resources_xml)
 
 
