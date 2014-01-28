@@ -55,7 +55,7 @@ class CIB(object):
 
 
     @staticmethod
-    def _add_resource_el(parent_el, id, cls, provider, type, started, atrrs=None):
+    def _add_resource_el(parent_el, id, cls, provider, type, started, attrs=None):
         resource_el = SubEl(parent_el, "primitive", {"id": id,
                                                      "class": cls,
                                                      "provider": provider,
