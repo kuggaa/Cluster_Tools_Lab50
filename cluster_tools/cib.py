@@ -138,7 +138,7 @@ class CIB(object):
                              provider="pacemaker",
                              type="VirtualDomain",
                              started=True,
-                             atrrs={
+                             attrs={
                                  "config": conf_file_path,
                                  "hypervisor": "qemu:///system"})
         self._communicator.modify(resources_el)
