@@ -226,7 +226,8 @@ class Cluster(object):
                     return child_resource
         return None
 
-
+    def create_vm(self, id, conf_file_path):
+        self._cib.create_vm(id, conf_file_path)
     def create_dummy(self, id, started=True):
         self._cib.create_dummy(id, started)
 

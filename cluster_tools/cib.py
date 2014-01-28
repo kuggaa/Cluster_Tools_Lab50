@@ -21,13 +21,48 @@ class CIB(object):
     # Tags.
     RESOURCE_TAG = "primitive"
     GROUP_TAG = "group"
-    ATTRS_TAG = "meta_attributes"
+    META_ATTRS_TAG = "meta_attributes"
+    INSTANCE_ATTRS_TAG = "instance_attributes"
     ATTR_TAG = "nvpair"
     OPERATIONS_TAG = "operations"
     LOC_CONSTRAINT_TAG = "rsc_location"
     # Target role values.
     STARTED_ROLE = "Started"
     STOPPED_ROLE = "Stopped"
+
+
+    # Accessory method for _add_meta_attrs_el() and _add_instance_attrs_el().
+    @staticmethod
+    def _add_attrs_el(self, parent_el, tag, attrs):
+        id = parent_el.get("id") + "-" + tag
+        attrs_el = SubEl(parent_el, tag, {"id": id})
+        for attr_name, attr_val in attrs.iteritems():
+            SubEl(attrs_el, CIB.ATTR_TAG, {"id": id + "-" + attr_name,
+                                           "name": attr_name,
+                                           "value": attr_val})
+        return attrs_el
+
+
+    @staticmethod
+    def _add_meta_attrs_el(self, parent_el, started):
+        role = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
+        return CIB._add_attrs_el(parent_el, CIB.META_ATTRS_TAG, {"target-role": role})
+
+
+    @staticmethod
+    def _add_instance_attrs_el(self, parent_el, attrs):
+        return CIB._add_attrs_el(parent_el, CIB.INSTANCE_ATTRS_TAG, attrs)
+
+
+    @staticmethod
+    def _add_resorce_el(self, parent_el, id, cls, provider, type, started, atrrs=None):
+        resource_el = SubEl(parent_el, "primitive", {"id": id,
+                                                     "class": cls,
+                                                     "provider": provider,
+                                                     "type": type})
+        CIB._add_meta_attrs_el(parent_el=resource_el, started=started)
+        if (attrs is not None):
+            CIB._add_instance_attrs_el(parent_el=resource_el, attrs=attrs)
 
 
     @staticmethod
@@ -47,22 +82,10 @@ class CIB(object):
         return resources_xml.find("./group/primitive[@id='%s']/.." % (resource_xml.get("id")))
 
 
-    # Creates new child in "cib/configuration/resources" el (param `resources_xml`).
-    # Returns created element.
-    # It will have 1 child: attributes container.
-    # Attributes container will have 1 child: target role,
-    # which value depends on param `started`.
-    @staticmethod
-    def _create_resource(resources_xml, id, tag, started):
-        resource_xml = SubEl(resources_xml, tag, {"id": id})
-        # Create attributes container.
-        attrs_xml = SubEl(resource_xml, CIB.ATTRS_TAG)
-        attrs_xml.set("id", "%s-%s" % (id, CIB.ATTRS_TAG))
-        # Set target role.
-        role_xml = SubEl(attrs_xml, CIB.ATTR_TAG, {"name": "target-role"})
-        role_xml.set("id", attrs_xml.get("id") + "-target-role")
-        role_xml.set("value", CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE)
-        return resource_xml
+
+
+    def _get_resources_el(self):
+        return self._cib_xml.find(CIB.RESOURCES_XPATH)
 
 
     def get_attr_val(self, resource_id, attr_name):
@@ -108,30 +131,45 @@ class CIB(object):
         return [res.get("id") for res in resources_xml]
 
 
+    def create_vm(self, id, conf_file_path):
+        resources_el = self._get_resources_el()
+        CIB._add_resorce_el(parent_el=resources_el,
+                            id=id,
+                            cls="ocf",
+                            provider="pacemaker",
+                            type="VirtualDomain",
+                            started=True,
+                            atrrs={
+                                "config": conf_file_path,
+                                "hypervisor": "qemu:///system"})
+        self._communicator.modify(resources_el)
+
+
     def create_dummy(self, id, started):
-        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
-        assert(resources_xml is not None)
-        resource_xml = CIB._create_resource(resources_xml, id, CIB.RESOURCE_TAG, started)
-        resource_xml.set("class", "ocf")
-        resource_xml.set("provider", "pacemaker")
-        resource_xml.set("type", "Dummy")
+        resources_el = self._get_resources_el()
+        CIB._add_resorce_el(parent_el=resources_el,
+                            id=id,
+                            cls="ocf",
+                            provider="pacemaker",
+                            type="Dummy",
+                            started=started)
         self._communicator.modify(resources_xml)
 
 
-    def create_group(self, group_id, children_ids, started):
-        resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
-        assert(resources_xml is not None)
-        group_xml = CIB._create_resource(resources_xml, group_id, CIB.GROUP_TAG, started)
+    def create_group(self, id, children_ids, started):
+        resources_el = self._get_resources_el()
+        group_el = SubEl(parent_el, CIB.GROUP_TAG, {"id": id})
+        CIB._add_meta_attrs_el(group_el, started)
 
         # TODO: do something with remove stuff.
         for child_id in children_ids:
-            child_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (child_id))
+            child_el = self._cib_xml.find(CIB.RESOURCE_XPATH % (child_id))
             if (child_xml is None):
                 continue
-            resources_xml.remove(child_xml)
-            group_xml.append(child_xml)
+            resources_el.remove(child_el)
+            group_el.append(child_el)
 
-        self._communicator.modify(resources_xml)
+        self._communicator.modify(resources_el)
 
 
     # Returns None in case of fail.
