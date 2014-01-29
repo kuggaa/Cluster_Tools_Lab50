@@ -31,11 +31,11 @@ class CIB(object):
     STOPPED_ROLE = "Stopped"
 
 
-    # Accessory method for _add_meta_attrs_el() and _add_instance_attrs_el().
     @staticmethod
-    def _add_attrs_el(parent_el, tag, attrs):
-        id = parent_el.get("id") + "-" + tag
-        attrs_el = SubEl(parent_el, tag, {"id": id})
+    def _add_attrs_el(resource_el, tag, attrs):
+        """ Accessory method for _add_meta_attrs_el() and _add_instance_attrs_el(). """
+        id = resource_el.get("id") + "-" + tag
+        attrs_el = SubEl(resource_el, tag, {"id": id})
         for attr_name, attr_val in attrs.iteritems():
             SubEl(attrs_el, CIB.ATTR_TAG, {"id": id + "-" + attr_name,
                                            "name": attr_name,
@@ -44,25 +44,43 @@ class CIB(object):
 
 
     @staticmethod
-    def _add_meta_attrs_el(parent_el, started):
-        role = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
-        return CIB._add_attrs_el(parent_el, CIB.META_ATTRS_TAG, {"target-role": role})
+    def _add_meta_attrs_el(resource_el, started=None, migration_allowed=None):
+        attrs = {}
+        if (started is not None):
+            attrs["target-role"] = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
+        if (migration_allowed is not None):
+            attrs["allow-migrate"] = "true" if (started) else "false"
+        return CIB._add_attrs_el(parent_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
-    def _add_instance_attrs_el(parent_el, attrs):
-        return CIB._add_attrs_el(parent_el, CIB.INSTANCE_ATTRS_TAG, attrs)
+    def _add_instance_attrs_el(resource_el, attrs):
+        return CIB._add_attrs_el(resource_el, tag=CIB.INSTANCE_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
-    def _add_resource_el(parent_el, id, cls, provider, type, started, attrs=None):
+    def _add_resource_el(parent_el,
+                         id,
+                         cls,
+                         provider,
+                         type,
+                         started=None,
+                         migration_allowed=None,
+                         instance_attrs=None):
+        """
+        Creates a primitive resource element in `parent_el`.
+        Params `started` and `migration_allowed` are bool.
+        Param `instance_attrs` is dict.
+        """
         resource_el = SubEl(parent_el, "primitive", {"id": id,
                                                      "class": cls,
                                                      "provider": provider,
                                                      "type": type})
-        CIB._add_meta_attrs_el(parent_el=resource_el, started=started)
-        if (attrs is not None):
-            CIB._add_instance_attrs_el(parent_el=resource_el, attrs=attrs)
+        CIB._add_meta_attrs_el(resource_el,
+                               started=started,
+                               migration_allowed=migration_allowed)
+        if (instance_attrs is not None):
+            CIB._add_instance_attrs_el(resource_el, attrs=instance_attrs)
 
 
     @staticmethod
@@ -130,21 +148,22 @@ class CIB(object):
         return [res.get("id") for res in resources_xml]
 
 
-    def create_vm(self, id, conf_file_path):
+    def create_vm(self, id, conf_file_path, started=True):
         resources_el = self._get_resources_el()
         CIB._add_resource_el(parent_el=resources_el,
                              id=id,
                              cls="ocf",
                              provider="heartbeat",
                              type="VirtualDomain",
-                             started=True,
-                             attrs={
-                                 "config": conf_file_path,
-                                 "hypervisor": "qemu:///system"})
+                             started=started,
+                             migration_allowed=True,
+                             instance_attrs={"config": conf_file_path,
+                                             "hypervisor": "qemu:///system",
+                                             "migration_transport": "tcp"})
         self._communicator.modify(resources_el)
 
 
-    def create_dummy(self, id, started):
+    def create_dummy(self, id, started=True):
         resources_el = self._get_resources_el()
         CIB._add_resource_el(parent_el=resources_el,
                              id=id,
