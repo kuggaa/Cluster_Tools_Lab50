@@ -3,6 +3,13 @@ from communicator import Communicator
 from xml.etree.ElementTree import SubElement as SubEl
 
 
+class Operation(object):
+    def __init__(self, name, interval, timeout):
+        self.name = name
+        self.interval = interval
+        self.timeout = timeout
+
+
 # Cluster Information Base.
 class CIB(object):
     # Xpaths wrt cib element.
@@ -25,6 +32,7 @@ class CIB(object):
     INSTANCE_ATTRS_TAG = "instance_attributes"
     ATTR_TAG = "nvpair"
     OPERATIONS_TAG = "operations"
+    OPERATION_TAG = "op"
     LOC_CONSTRAINT_TAG = "rsc_location"
     # Target role values.
     STARTED_ROLE = "Started"
@@ -50,12 +58,32 @@ class CIB(object):
             attrs["target-role"] = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
         if (migration_allowed is not None):
             attrs["allow-migrate"] = "true" if (started) else "false"
-        return CIB._add_attrs_el(parent_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
+        return CIB._add_attrs_el(resource_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
     def _add_instance_attrs_el(resource_el, attrs):
         return CIB._add_attrs_el(resource_el, tag=CIB.INSTANCE_ATTRS_TAG, attrs=attrs)
+
+
+    @staticmethod
+    def _add_operations_el(resource_el, operations):
+        """
+        Creates operations container in `resource_el`.
+        Param `operations` is list of Operation's instances.
+        """
+        ops_el = SubEl(resource_el,
+                       CIB.OPERATIONS_TAG,
+                       {"id": resource_el.get("id") + "-" + CIB.OPERATIONS_TAG})
+        for op in operations:
+            id = "{res_id}-{tag}-{name}-{interval}".format(res_id=resource_el.get("id"),
+                                                           tag=CIB.OPERATION_TAG,
+                                                           name=op.name,
+                                                           interval=op.interval)
+            SubEl(ops_el, CIB.OPERATION_TAG, {"id": id,
+                                              "name": op.name,
+                                              "interval": op.interval,
+                                              "timeout": op.timeout})
 
 
     @staticmethod
@@ -66,11 +94,13 @@ class CIB(object):
                          type,
                          started=None,
                          migration_allowed=None,
-                         instance_attrs=None):
+                         instance_attrs=None,
+                         operations=None):
         """
         Creates a primitive resource element in `parent_el`.
         Params `started` and `migration_allowed` are bool.
         Param `instance_attrs` is dict.
+        Param `operations` is list of Operation's instances.
         """
         resource_el = SubEl(parent_el, "primitive", {"id": id,
                                                      "class": cls,
@@ -150,6 +180,9 @@ class CIB(object):
 
     def create_vm(self, id, conf_file_path, started=True):
         resources_el = self._get_resources_el()
+        operations = [Operation("monitor", interval=10, timeout=30),
+                      Operation("migrate_from", interval=0, timeout=100),
+                      Operation("migrate_to", interval=0, timeout=120)]
         CIB._add_resource_el(parent_el=resources_el,
                              id=id,
                              cls="ocf",
@@ -159,7 +192,8 @@ class CIB(object):
                              migration_allowed=True,
                              instance_attrs={"config": conf_file_path,
                                              "hypervisor": "qemu:///system",
-                                             "migration_transport": "tcp"})
+                                             "migration_transport": "tcp"},
+                             operations=operations)
         self._communicator.modify(resources_el)
 
 
