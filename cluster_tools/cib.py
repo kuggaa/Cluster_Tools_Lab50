@@ -111,6 +111,8 @@ class CIB(object):
                                migration_allowed=migration_allowed)
         if (instance_attrs is not None):
             CIB._add_instance_attrs_el(resource_el, attrs=instance_attrs)
+        if (operations is not None):
+            CIB._add_operations_el(resource_el, operations=operations)
 
 
     @staticmethod
