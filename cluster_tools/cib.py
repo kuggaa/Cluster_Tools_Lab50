@@ -82,8 +82,8 @@ class CIB(object):
                                                            interval=op.interval)
             SubEl(ops_el, CIB.OPERATION_TAG, {"id": id,
                                               "name": op.name,
-                                              "interval": op.interval,
-                                              "timeout": op.timeout})
+                                              "interval": str(op.interval),
+                                              "timeout": str(op.timeout)})
 
 
     @staticmethod
@@ -363,29 +363,25 @@ class CIB(object):
         self._communicator.modify(resources_xml)
 
 
-    # Send remove command via self._communicator and delete element from CIB.
+    # TODO: finish it.
     def remove_resource(self, resource_id):
+        """ Removes primitive resource (NOT GROUP). """
         resources_xml = self._cib_xml.find(CIB.RESOURCES_XPATH)
         resource_xml = self._cib_xml.find(CIB.RESOURCE_XPATH % (resource_id))
         if (resource_xml is None):
             return
+        assert(CIB.GROUP_TAG != resource_xml.tag)
 
-        # Process group.
-        if (CIB.GROUP_TAG == resource_xml.tag):
+        group_xml = CIB._get_group_of_resource(resources_xml, resource_xml)
+        # Process root primitive resource.
+        if (group_xml is None):
             self._communicator.remove_resource(resource_xml)
             resources_xml.remove(resource_xml)
-        # Process primitive resource.
+        # Process child primitive resource.
         else:
-            group_xml = CIB._get_group_of_resource(resources_xml, resource_xml)
-            # Process root primitive resource.
-            if (group_xml is None):
-                self._communicator.remove_resource(resource_xml)
-                resources_xml.remove(resource_xml)
-            # Process child primitive resource.
+            if (1 == CIB._get_group_children_qty(group_xml)):
+                self._communicator.remove_resource(group_xml)
+                resources_xml.remove(group_xml)
             else:
-                if (1 == CIB._get_group_children_qty(group_xml)):
-                    self._communicator.remove_resource(group_xml)
-                    resources_xml.remove(group_xml)
-                else:
-                    self._communicator.remove_resource(resource_xml)
-                    group_xml.remove(resource_xml)
+                self._communicator.remove_resource(resource_xml)
+                group_xml.remove(resource_xml)
