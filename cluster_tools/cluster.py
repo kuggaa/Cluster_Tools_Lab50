@@ -54,16 +54,13 @@ class BaseResource(object):
     def remove_loc_constraints(self):
         self._cib.remove_loc_constraints(self.id)
 
-    def remove(self):
-        self._cib.remove_resource(self.id)
 
-
-class Resource(BaseResource):
+class PrimitiveResource(BaseResource):
     def __init__(self, resource_id, resource_type, cib):
         self._cib = cib
         self.id = resource_id
         self.type = resource_type
-        self.state = cib.get_resource_state(self.id)
+        self.state = cib.get_primitive_resource_state(self.id)
         if (const.resource_state.ON == self.state):
             self.nodes_ids = cib.get_resource_nodes(self.id)
         else:
@@ -79,15 +76,18 @@ class Resource(BaseResource):
     def move_to_root(self):
         self._cib.move_to_root(self.id)
 
+    def remove(self):
+        self._cib.remove_primitive_resource(self.id)
+
     def __str__(self):
         return "Resource " + self.id
     def __repr__(self):
         return "Resource " + self.id
 
 
-class VM(Resource):
+class VM(PrimitiveResource):
     def __init__(self, resource_id, cib):
-        Resource.__init__(self, resource_id, const.resource_type.VM, cib)
+        PrimitiveResource.__init__(self, resource_id, const.resource_type.VM, cib)
 
 
     def get_vnc_id(self):
@@ -124,10 +124,9 @@ class Group(BaseResource):
         self.type = const.resource_type.GROUP
 
         self._resources = {}
-        children_ids = cib.get_children(self.id)
+        children_ids = cib.get_children_ids(self.id)
         for child_id in children_ids:
-            child_type = cib.get_resource_type(child_id)
-            self._resources[child_id] = Resource(child_id, child_type, cib)
+            self._resources[child_id] = build_resource(child_id, cib)
 
         self.state = self._get_state()
 
@@ -175,7 +174,7 @@ def build_resource(resource_id, cib):
     elif (const.resource_type.VM == resource_type):
         return VM(resource_id, cib)
     else:
-        return Resource(resource_id, resource_type, cib)
+        return PrimitiveResource(resource_id, resource_type, cib)
 
 
 class Cluster(object):
@@ -187,13 +186,13 @@ class Cluster(object):
         self._cib.update()
 
         nodes = {}
-        nodes_ids = self._cib.get_nodes()
+        nodes_ids = self._cib.get_nodes_ids()
         for node_id in nodes_ids:
             nodes[node_id] = Node(node_id, self._cib)
         self._nodes = nodes
 
         resources = {}
-        resources_ids = self._cib.get_root_resources()
+        resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
             resources[resource_id] = build_resource(resource_id, self._cib)
         self._resources = resources
