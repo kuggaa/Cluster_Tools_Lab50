@@ -224,7 +224,7 @@ class CIB(object):
                     self._resources_el.remove(current_group_el)
                 else:
                     current_group_el.remove(resource_el)
-            group_el.append(child_el)
+            group_el.append(resource_el)
 
         self._communicator.modify(self._resources_el)
 
