@@ -129,6 +129,11 @@ class Group(BaseResource):
             self._resources[child_id] = build_resource(child_id, cib)
 
         self.state = self._get_state()
+        self.nodes_ids = []
+        for child in self._resources.values():
+            if (const.resource_state.ON == child.state):
+                self.nodes_ids = child.nodes_ids[:]
+                break
 
 
     # TODO: it can be done with 2 passes.
