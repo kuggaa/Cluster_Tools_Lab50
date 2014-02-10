@@ -3,15 +3,10 @@ from communicator import Communicator
 from xml.etree.ElementTree import SubElement as SubEl
 
 
-class Operation(object):
-    def __init__(self, name, interval, timeout):
-        self.name = name
-        self.interval = interval
-        self.timeout = timeout
-
-
 # Cluster Information Base.
 class CIB(object):
+    VM_TMPL_ID = "vm_template"
+    DUMMY_TMPL_ID = "dummy_template"
     # Xpaths wrt cib element.
     NODES_XPATH = "./configuration/nodes"
     RESOURCES_XPATH = "./configuration/resources"
@@ -33,8 +28,7 @@ class CIB(object):
 
 
     @staticmethod
-    def _add_attrs_el(resource_el, tag, attrs):
-        """ Accessory method for _add_meta_attrs_el() and _add_instance_attrs_el(). """
+    def _create_attrs_el(resource_el, tag, attrs):
         id = resource_el.get("id") + "-" + tag
         attrs_el = SubEl(resource_el, tag, {"id": id})
         for attr_name, attr_val in attrs.iteritems():
@@ -45,67 +39,27 @@ class CIB(object):
 
 
     @staticmethod
-    def _add_meta_attrs_el(resource_el, started=None, migration_allowed=None):
-        attrs = {}
-        if (started is not None):
-            attrs["target-role"] = CIB.STARTED_ROLE if (started) else CIB.STOPPED_ROLE
-        if (migration_allowed is not None):
-            attrs["allow-migrate"] = "true" if (started) else "false"
+    def _create_meta_attrs_el(resource_el, attrs):
         return CIB._add_attrs_el(resource_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
-    def _add_instance_attrs_el(resource_el, attrs):
+    def _create_instance_attrs_el(resource_el, attrs):
         return CIB._add_attrs_el(resource_el, tag=CIB.INSTANCE_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
-    def _add_operations_el(resource_el, operations):
-        """
-        Creates operations container in `resource_el`.
-        Param `operations` is list of Operation's instances.
-        """
-        ops_el = SubEl(resource_el,
-                       CIB.OPERATIONS_TAG,
-                       {"id": resource_el.get("id") + "-" + CIB.OPERATIONS_TAG})
-        for op in operations:
-            id = "{res_id}-{tag}-{name}-{interval}".format(res_id=resource_el.get("id"),
-                                                           tag=CIB.OPERATION_TAG,
-                                                           name=op.name,
-                                                           interval=op.interval)
-            SubEl(ops_el, CIB.OPERATION_TAG, {"id": id,
-                                              "name": op.name,
-                                              "interval": str(op.interval),
-                                              "timeout": str(op.timeout)})
-
-
-    @staticmethod
-    def _add_resource_el(parent_el,
-                         id,
-                         cls,
-                         provider,
-                         type,
-                         started=None,
-                         migration_allowed=None,
-                         instance_attrs=None,
-                         operations=None):
+    def _create_primitive_resource_el(parent_el, id, tmpl_id, instance_attrs=None):
         """
         Creates a primitive resource element in `parent_el`.
-        Params `started` and `migration_allowed` are bool.
         Param `instance_attrs` is dict.
-        Param `operations` is list of Operation's instances.
         """
-        resource_el = SubEl(parent_el, "primitive", {"id": id,
-                                                     "class": cls,
-                                                     "provider": provider,
-                                                     "type": type})
-        CIB._add_meta_attrs_el(resource_el,
-                               started=started,
-                               migration_allowed=migration_allowed)
+        resource_el = SubEl(parent_el, "primitive", {"id": id, "template": tmpl_id})
+        #CIB._add_meta_attrs_el(resource_el,
+        #                       started=started,
+        #                       migration_allowed=migration_allowed)
         if (instance_attrs is not None):
-            CIB._add_instance_attrs_el(resource_el, attrs=instance_attrs)
-        if (operations is not None):
-            CIB._add_operations_el(resource_el, operations=operations)
+            CIB._create_instance_attrs_el(resource_el, attrs=instance_attrs)
 
 
     def _get_primitive_resource_el(self, id):
@@ -152,6 +106,7 @@ class CIB(object):
         self._cib_el = self._communicator.get_cib()
         self._nodes_el = self._cib_el.find(CIB.NODES_XPATH)
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
+        print(ET.tostring(self._resources_el))
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)
 
 
@@ -182,36 +137,25 @@ class CIB(object):
 
 
     def create_vm(self, id, conf_file_path, started=True):
-        operations = [Operation("monitor", interval=10, timeout=30),
-                      Operation("migrate_from", interval=0, timeout=100),
-                      Operation("migrate_to", interval=0, timeout=120)]
-        CIB._add_resource_el(parent_el=self._resources_el,
-                             id=id,
-                             cls="ocf",
-                             provider="heartbeat",
-                             type="VirtualDomain",
-                             started=started,
-                             migration_allowed=True,
-                             instance_attrs={"config": conf_file_path,
-                                             "hypervisor": "qemu:///system",
-                                             "migration_transport": "tcp"},
-                             operations=operations)
+        CIB._create_resource_el(parent_el=self._resources_el,
+                                id=id,
+                                tmpl_id=CIB.VM_TMPL_ID
+                                instance_attrs={"config": conf_file_path})
         self._communicator.modify(self._resources_el)
 
 
     def create_dummy(self, id, started=True):
-        CIB._add_resource_el(parent_el=self._resources_el,
-                             id=id,
-                             cls="ocf",
-                             provider="pacemaker",
-                             type="Dummy",
-                             started=started)
+        CIB._create_resource_el(parent_el=self._resources_el,
+                                id=id,
+                                tmpl_id=CIB.DUMMY_TMPL_ID)
         self._communicator.modify(self._resources_el)
 
 
     def create_group(self, id, children_ids, started):
-        group_el = SubEl(self._resources_el, CIB.GROUP_TAG, {"id": id})
-        CIB._add_meta_attrs_el(group_el, started=started)
+        group_el = SubEl(self._resources_el, CIB.GROUP_TAG, {"id": id,
+                                                             "ordered": "false",
+                                                             "collocated": "false"})
+        CIB._create_meta_attrs_el(group_el, attrs={"target-role": CIB.STARTED_ROLE})
 
         for child_id in children_ids:
             resource_el = self._get_primitive_resource_el(child_id)
