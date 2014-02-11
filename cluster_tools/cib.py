@@ -106,7 +106,6 @@ class CIB(object):
         self._cib_el = self._communicator.get_cib()
         self._nodes_el = self._cib_el.find(CIB.NODES_XPATH)
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
-        print(ET.tostring(self._resources_el))
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)
 
 
@@ -136,10 +135,10 @@ class CIB(object):
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
 
 
-    def create_vm(self, id, conf_file_path, started=True):
+    def create_vm(self, id, conf_file_path):
         CIB._create_resource_el(parent_el=self._resources_el,
                                 id=id,
-                                tmpl_id=CIB.VM_TMPL_ID
+                                tmpl_id=CIB.VM_TMPL_ID,
                                 instance_attrs={"config": conf_file_path})
         self._communicator.modify(self._resources_el)
 
