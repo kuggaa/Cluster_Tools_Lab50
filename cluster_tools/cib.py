@@ -40,12 +40,12 @@ class CIB(object):
 
     @staticmethod
     def _create_meta_attrs_el(resource_el, attrs):
-        return CIB._add_attrs_el(resource_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
+        return CIB._create_attrs_el(resource_el, tag=CIB.META_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
     def _create_instance_attrs_el(resource_el, attrs):
-        return CIB._add_attrs_el(resource_el, tag=CIB.INSTANCE_ATTRS_TAG, attrs=attrs)
+        return CIB._create_attrs_el(resource_el, tag=CIB.INSTANCE_ATTRS_TAG, attrs=attrs)
 
 
     @staticmethod
