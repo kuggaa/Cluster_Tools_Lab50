@@ -67,6 +67,11 @@ class CIB(object):
         return self._resources_el.find(".//primitive[@id='%s']" % (id))
 
 
+    def _get_tmpl_el(self, id):
+        """ Returns None in case of fail. """
+        return self._resources_el.find("./template[@id='%s']" % (id))
+
+
     def _get_group_el(self, id):
         """ Returns None in case of fail. """
         return self._resources_el.find("./group[@id='%s']" % (id))
@@ -176,12 +181,16 @@ class CIB(object):
         """ Returns None in case of fail. """
         if (self._get_group_el(id) is not None):
             return const.resource_type.GROUP
-
+        
         primitive_resource_el = self._get_primitive_resource_el(id)
-        if (primitive_resource_el is None):
-            return None
-        # TODO: govnocode.
         primitive_type = primitive_resource_el.get("type")
+        if (primitive_type is None):
+            tmpl_id = primitive_resource_el.get("template")
+            if (tmpl_id is None):
+                return None
+            primitive_type = self._get_tmpl_el(tmpl_id).get("type")
+
+        # TODO: govnocode.
         if ("IPaddr" == primitive_type):
             return const.resource_type.IP
         elif ("VirtualDomain" == primitive_type):
