@@ -136,17 +136,17 @@ class CIB(object):
 
 
     def create_vm(self, id, conf_file_path):
-        CIB._create_resource_el(parent_el=self._resources_el,
-                                id=id,
-                                tmpl_id=CIB.VM_TMPL_ID,
-                                instance_attrs={"config": conf_file_path})
+        CIB._create_primitive_resource_el(parent_el=self._resources_el,
+                                          id=id,
+                                          tmpl_id=CIB.VM_TMPL_ID,
+                                          instance_attrs={"config": conf_file_path})
         self._communicator.modify(self._resources_el)
 
 
     def create_dummy(self, id, started=True):
-        CIB._create_resource_el(parent_el=self._resources_el,
-                                id=id,
-                                tmpl_id=CIB.DUMMY_TMPL_ID)
+        CIB._create_primitive_resource_el(parent_el=self._resources_el,
+                                          id=id,
+                                          tmpl_id=CIB.DUMMY_TMPL_ID)
         self._communicator.modify(self._resources_el)
 
 

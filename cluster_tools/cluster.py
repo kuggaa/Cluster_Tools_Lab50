@@ -218,6 +218,7 @@ class Cluster(object):
 
 
     def get_resource(self, resource_id):
+        """ Returns None in case of fail. """
         resource = self._resources.get(resource_id, None)
         if (resource is not None):
             return resource
