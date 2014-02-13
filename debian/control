@@ -1,0 +1,21 @@
+Source: cluster-tools
+Maintainer: Лаборатория 50 <team@lab50.net>
+Section: non-free/python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.7.0), debhelper (>= 7), python-netsnmp
+Standards-Version: 3.9.1
+X-Python-Version: >= 2.7
+
+Package: python-hac-tools
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: библиотека утилит для кластера высокой готовности
+ Пакет содержит библиотеку для управления оборудованием кластера высокой
+ готовности: УРП, коммутаторы, IPMI. ПК управления предоставляет
+ веб-интерфейс для управления
+ ресурсами и узлами КВГ, индикацию состояния элементов кластера.
+ .
+ Программный комплекс кластера высокой готовности предназначен
+ для построения надежных защищенных кластеров на основе операционной
+ системы Astra Linux Special Edition версии 1.3.
+
