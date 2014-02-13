@@ -128,7 +128,7 @@ class Communicator(object):
             return const.resource_state.FAILED
         elif ("stopping" in state):
             return const.resource_state.STOPPING
-        elif ("not running" in state):
+        elif ("not running" in state) or ("Stopped" in state):
             return const.resource_state.OFF
         elif ("running" in state):
             return const.resource_state.ON

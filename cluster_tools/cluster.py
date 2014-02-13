@@ -184,13 +184,8 @@ class Clone(BaseResource):
         for child_id in children_ids:
             self._resources[child_id] = build_primitive_resource(child_id, clone_type, cib)
 
-        #self.state = self._get_state()
-        self.state = const.resource_state.ON
+        self.state = self._get_state()
         self.nodes_ids = []
-        #for child in self._resources.values():
-        #    if (const.resource_state.ON == child.state):
-        #        self.nodes_ids = child.nodes_ids[:]
-        #        break
 
 
     # TODO: it can be done with 2 passes.
