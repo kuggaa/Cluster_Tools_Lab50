@@ -17,10 +17,13 @@ class node_state(object):
 
 class resource_type(object):
     GROUP = 1
-    VM = 2
-    GLUSTER_FS = 3
+    CLONE = 2
+    VM = 3
     DUMMY = 4
     IP = 5
+    FILESYSTEM = 6
+    VOLUME = 7
+    GLUSTERD = 8
 
     @staticmethod
     def to_str(res_type):

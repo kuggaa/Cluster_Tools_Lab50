@@ -16,6 +16,7 @@ class CIB(object):
     NODE_TAG = "node"
     PRIMITIVE_RESOURCE_TAG = "primitive"
     GROUP_TAG = "group"
+    CLONE_TAG = "clone"
     META_ATTRS_TAG = "meta_attributes"
     INSTANCE_ATTRS_TAG = "instance_attributes"
     ATTR_TAG = "nvpair"
@@ -26,6 +27,12 @@ class CIB(object):
     STARTED_ROLE = "Started"
     STOPPED_ROLE = "Stopped"
 
+    RAW_TYPES = {"VirtualDomain": const.resource_type.VM,
+                 "IPaddr": const.resource_type.IP,
+                 "Dummy": const.resource_type.DUMMY,
+                 "Filesystem": const.resource_type.FILESYSTEM,
+                 "volume": const.resource_type.VOLUME,
+                 "glusterd": const.resource_type.GLUSTERD}
 
     @staticmethod
     def _create_attrs_el(resource_el, tag, attrs):
@@ -66,25 +73,24 @@ class CIB(object):
         """ Returns None in case of fail. """
         return self._resources_el.find(".//primitive[@id='%s']" % (id))
 
-
     def _get_tmpl_el(self, id):
         """ Returns None in case of fail. """
         return self._resources_el.find("./template[@id='%s']" % (id))
-
 
     def _get_group_el(self, id):
         """ Returns None in case of fail. """
         return self._resources_el.find("./group[@id='%s']" % (id))
 
+    def _get_clone_el(self, id):
+        """ Returns None in case of fail. """
+        return self._resources_el.find("./clone[@id='%s']" % (id))
 
     def _get_group_el_by_resource(self, id):
         """ Returns None for a root resource. """
         return self._resources_el.find("./group/primitive[@id='%s']/.." % (id))
 
-
     def _get_loc_contraints_els_by_resource(self, id):
         return self._constraints_el.findall("./rsc_location[@rsc='%s']" % (id))
-
 
     def get_attr_val(self, resource_id, attr_name):
         XPATH = "./configuration/resources//*[@id='%s']/instance_attributes/nvpair[@name='%s']"
@@ -132,12 +138,18 @@ class CIB(object):
     def get_root_resources_ids(self):
         groups_els = self._resources_el.findall(CIB.GROUP_TAG) 
         primitives_els = self._resources_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)
-        return [el.get("id") for el in groups_els + primitives_els]
+        clones_els = self._resources_el.findall(CIB.CLONE_TAG)
+        return [el.get("id") for el in primitives_els + groups_els + clones_els]
 
 
-    def get_children_ids(self, group_id):
+    def get_group_children(self, group_id):
+        """ Returns list of ids. """ 
         group_el = self._get_group_el(group_id)
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
+
+    def get_clone_children(self, clone_id):
+        """ Returns list of ids. """ 
+        return self._communicator.get_clone_children(clone_id)
 
 
     def create_vm(self, id, conf_file_path):
@@ -181,6 +193,8 @@ class CIB(object):
         """ Returns None in case of fail. """
         if (self._get_group_el(id) is not None):
             return const.resource_type.GROUP
+        elif (self._get_clone_el(id) is not None):
+            return const.resource_type.CLONE
         
         primitive_resource_el = self._get_primitive_resource_el(id)
         primitive_type = primitive_resource_el.get("type")
@@ -190,15 +204,13 @@ class CIB(object):
                 return None
             primitive_type = self._get_tmpl_el(tmpl_id).get("type")
 
-        # TODO: govnocode.
-        if ("IPaddr" == primitive_type):
-            return const.resource_type.IP
-        elif ("VirtualDomain" == primitive_type):
-            return const.resource_type.VM
-        elif ("Dummy" == primitive_type):
-            return const.resource_type.DUMMY
-        else:
-            return None
+        return CIB.RAW_TYPES.get(primitive_type)
+
+
+    def get_clone_type(self, id):
+        clone_el = self._get_clone_el(id)
+        raw_clone_type = clone_el.find(CIB.PRIMITIVE_RESOURCE_TAG).get("type")
+        return CIB.RAW_TYPES.get(raw_clone_type)
 
 
     def get_primitive_resource_state(self, id):

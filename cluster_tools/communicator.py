@@ -111,6 +111,10 @@ class Communicator(object):
         self._perform_cmd(Communicator.STANDBY_MODE_CMD % ("off", node_id))
 
 
+    def get_clone_children(self, clone_id):
+        return self._perform_cmd("sub_rsc\n" + clone_id)
+
+
     # Result is a list of nodes ids.
     def get_resource_nodes(self, resource_id):
         return self._perform_cmd("rsc_running_on\n" + resource_id)

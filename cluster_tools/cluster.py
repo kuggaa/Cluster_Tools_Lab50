@@ -124,7 +124,7 @@ class Group(BaseResource):
         self.type = const.resource_type.GROUP
 
         self._resources = {}
-        children_ids = cib.get_children_ids(self.id)
+        children_ids = cib.get_group_children(self.id)
         for child_id in children_ids:
             self._resources[child_id] = build_resource(child_id, cib)
 
@@ -172,14 +172,78 @@ class Group(BaseResource):
             resource.cleanup()
 
 
+class Clone(BaseResource):
+    def __init__(self, clone_id, cib):
+        self._cib = cib
+        self.id = clone_id
+        self.type = const.resource_type.CLONE
+
+        self._resources = {}
+        children_ids = cib.get_clone_children(self.id)
+        clone_type = cib.get_clone_type(self.id)
+        for child_id in children_ids:
+            self._resources[child_id] = build_primitive_resource(child_id, clone_type, cib)
+
+        #self.state = self._get_state()
+        self.state = const.resource_state.ON
+        self.nodes_ids = []
+        #for child in self._resources.values():
+        #    if (const.resource_state.ON == child.state):
+        #        self.nodes_ids = child.nodes_ids[:]
+        #        break
+
+
+    # TODO: it can be done with 2 passes.
+    def _get_state(self):
+        states_priority = [const.resource_state.ON,
+                           const.resource_state.STARTING,
+                           const.resource_state.STOPPING,
+                           const.resource_state.FAILED,
+                           const.resource_state.UNMANAGED]
+        for state in states_priority:
+            for child in self._resources.values():
+                if (state == child.state):
+                    return state
+        return const.resource_state.OFF
+
+
+    def get_resources(self):
+        for resource in self._resources.values():
+            yield resource
+
+    def get_resource(self, resource_id):
+        return self._resources.get(resource_id, None)
+
+    def get_resources_qty(self):
+        return len(self._resources)
+
+    def set_running_state(self, resource_is_running):
+        for resource in self._resources.values():
+            if (const.resource_state.NO_MONITORING == resource.state):
+                continue
+            resource.set_running_state(resource_is_running)
+
+
+    def cleanup(self):
+        for resource in self._resources.values():
+            resource.cleanup()
+
+
+def build_primitive_resource(resource_id, resource_type, cib):
+    if (const.resource_type.VM == resource_type):
+        return VM(resource_id, cib)
+    else:
+        return PrimitiveResource(resource_id, resource_type, cib)    
+
+
 def build_resource(resource_id, cib):
     resource_type = cib.get_resource_type(resource_id)
     if (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
-    elif (const.resource_type.VM == resource_type):
-        return VM(resource_id, cib)
+    elif (const.resource_type.CLONE == resource_type):
+        return Clone(resource_id, cib)
     else:
-        return PrimitiveResource(resource_id, resource_type, cib)
+        return build_primitive_resource(resource_id, resource_type, cib)
 
 
 class Cluster(object):
