@@ -104,9 +104,9 @@ class CIB(object):
         return (1 == len(group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)))
 
 
-    def __init__(self, host):
+    def __init__(self, host, login, password):
         self._communicator = Communicator()
-        self._communicator.connect(host=host)
+        self._communicator.connect(host, login, password)
         self._cib_el = None
         self._nodes_el = None
         self._resources_el = None

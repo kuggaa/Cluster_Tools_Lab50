@@ -186,6 +186,10 @@ class Clone(BaseResource):
 
         self.state = self._get_state()
         self.nodes_ids = []
+        for child in self._resources.values():
+            if (const.resource_state.ON == child.state):
+                self.nodes_ids = child.nodes_ids[:]
+                break
 
 
     # TODO: it can be done with 2 passes.
@@ -242,8 +246,8 @@ def build_resource(resource_id, cib):
 
 
 class Cluster(object):
-    def __init__(self, host):
-        self._cib = CIB(host)
+    def __init__(self, host, login, password):
+        self._cib = CIB(host, login, password)
 
 
     def update(self):

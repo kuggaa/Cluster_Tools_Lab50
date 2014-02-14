@@ -8,6 +8,12 @@ class Configuraster(object):
             raise "conf fail =("
 
 
+    def get(self, section, param):
+        return self._config.get(section, param)
+    def get_int(self, section, param):
+        return self._config.getint(section, param)
+
+
     def get_section(self, section):
         params = {}
         for param, val in self._config.items(section):
