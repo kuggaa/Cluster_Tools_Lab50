@@ -61,11 +61,10 @@ class PrimitiveResource(BaseResource):
         self.id = resource_id
         self.type = resource_type
         self.state = cib.get_primitive_resource_state(self.id)
+        self.node_id = None
         if (const.resource_state.ON == self.state):
-            self.nodes_ids = cib.get_resource_nodes(self.id)
-        else:
-            self.nodes_ids = []
-  
+            self.node_id = cib.get_resource_node(self.id)
+
 
     def cleanup(self):
         self._cib.cleanup(self.id)
@@ -92,9 +91,8 @@ class VM(PrimitiveResource):
 
     def get_vnc_id(self):
         # Get node.
-        if (const.resource_state.ON != self.state) or (1 != len(self.nodes_ids)):
+        if (const.resource_state.ON != self.state):
             raise "OLOLO"
-        node_id = self.nodes_ids[0]
 
         # Get VM name.
         conf_path = self._cib.get_attr_val(self.id, "config")
@@ -106,7 +104,7 @@ class VM(PrimitiveResource):
         # Get VNC id.
         p = subprocess.Popen(args=["virsh",
                                    "-c",
-                                   "qemu+tcp://%s/system" % (node_id),
+                                   "qemu+tcp://%s/system" % (self.node_id),
                                    "vncdisplay",
                                    vm_name],
                              stdout=subprocess.PIPE,
@@ -129,10 +127,10 @@ class Group(BaseResource):
             self._resources[child_id] = build_resource(child_id, cib)
 
         self.state = self._get_state()
-        self.nodes_ids = []
+        self.node_id = None
         for child in self._resources.values():
             if (const.resource_state.ON == child.state):
-                self.nodes_ids = child.nodes_ids[:]
+                self.node_id = child.node_id
                 break
 
 
@@ -185,10 +183,10 @@ class Clone(BaseResource):
             self._resources[child_id] = build_primitive_resource(child_id, clone_type, cib)
 
         self.state = self._get_state()
-        self.nodes_ids = []
+        self.node_id = None
         for child in self._resources.values():
             if (const.resource_state.ON == child.state):
-                self.nodes_ids = child.nodes_ids[:]
+                self.node_id = child.node_id
                 break
 
 
@@ -254,8 +252,7 @@ class Cluster(object):
         self._cib.update()
 
         nodes = {}
-        nodes_ids = self._cib.get_nodes_ids()
-        for node_id in nodes_ids:
+        for node_id in self._cib.get_nodes_ids():
             nodes[node_id] = Node(node_id, self._cib)
         self._nodes = nodes
 

@@ -22,9 +22,9 @@ setup(name="cluster-tools",
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
       ],
-      install_requires=[
-          'netsnmp',
-          ],
+      #install_requires=[
+      #    'netsnmp',  
+      #    ],
       include_package_data=True,
       packages=["cluster_tools"],
       )

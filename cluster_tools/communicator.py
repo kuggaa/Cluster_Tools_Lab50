@@ -115,9 +115,10 @@ class Communicator(object):
         return self._perform_cmd("sub_rsc\n" + clone_id)
 
 
-    # Result is a list of nodes ids.
-    def get_resource_nodes(self, resource_id):
-        return self._perform_cmd("rsc_running_on\n" + resource_id)
+    def get_resource_node(self, resource_id):
+        result = self._perform_cmd("rsc_running_on\n" + resource_id)
+        assert(len(result) <= 1)
+        return result[0] if (1 == len(result)) else None
 
 
     def get_resource_state(self, resource_id):

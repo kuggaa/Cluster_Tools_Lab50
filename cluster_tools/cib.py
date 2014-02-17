@@ -227,8 +227,8 @@ class CIB(object):
 
 
     # Do not use for groups.
-    def get_resource_nodes(self, resource_id):
-        return self._communicator.get_resource_nodes(resource_id)
+    def get_resource_node(self, resource_id):
+        return self._communicator.get_resource_node(resource_id)
 
 
     def _modify_target_role(self, id, target_role):
