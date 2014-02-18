@@ -117,8 +117,7 @@ class Communicator(object):
 
     def get_resource_node(self, resource_id):
         result = self._perform_cmd("rsc_running_on\n" + resource_id)
-        assert(len(result) <= 1)
-        return result[0] if (1 == len(result)) else None
+        return result[0] if (len(result) >= 1) else None
 
 
     def get_resource_state(self, resource_id):
