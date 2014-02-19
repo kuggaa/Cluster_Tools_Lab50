@@ -1,3 +1,9 @@
+cluster-tools (0.1.2) testing; urgency=low
+
+  * Фикс в CIB и новые типы ресурсов.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 19 Feb 2014 19:11:28 +0530
+
 cluster-tools (0.1.1) testing; urgency=low
 
   * Исправление создания группы.
