@@ -29,6 +29,7 @@ class CIB(object):
 
     RAW_TYPES = {"VirtualDomain": const.resource_type.VM,
                  "IPaddr": const.resource_type.IP,
+                 "IPaddr2": const.resource_type.IP,
                  "Dummy": const.resource_type.DUMMY,
                  "Filesystem": const.resource_type.FILESYSTEM,
                  "volume": const.resource_type.VOLUME,
