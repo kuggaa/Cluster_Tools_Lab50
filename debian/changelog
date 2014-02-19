@@ -1,3 +1,9 @@
+cluster-tools (0.1.1) testing; urgency=low
+
+  * Исправление создания группы.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 19 Feb 2014 16:42:51 +0530
+
 cluster-tools (0.1.0) unstable; urgency=low
 
   * source package automatically created by stdeb 0.6.0+git
