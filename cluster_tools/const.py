@@ -24,6 +24,7 @@ class resource_type(object):
     FILESYSTEM = 6
     VOLUME = 7
     GLUSTERD = 8
+    IPMI = 9
 
     @staticmethod
     def to_str(res_type):
