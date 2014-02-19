@@ -168,10 +168,10 @@ class CIB(object):
 
 
     def create_group(self, id, children_ids, started):
-        group_el = SubEl(self._resources_el, CIB.GROUP_TAG, {"id": id,
-                                                             "ordered": "false",
-                                                             "collocated": "false"})
-        CIB._create_meta_attrs_el(group_el, attrs={"target-role": CIB.STARTED_ROLE})
+        group_el = SubEl(self._resources_el, CIB.GROUP_TAG, {"id": id})
+        CIB._create_meta_attrs_el(group_el, attrs={"target-role": CIB.STARTED_ROLE,
+                                                    "ordered": "false",
+                                                    "collocated": "false"})
 
         for child_id in children_ids:
             resource_el = self._get_primitive_resource_el(child_id)
