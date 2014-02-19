@@ -273,7 +273,7 @@ class CIB(object):
 
 
     def create_loc_constraint(self, resource_id, node_id):
-        self.remove_loc_constraints(resource_id)
+        self.remove_loc_constraints_by_resource(resource_id)
         attrs = {"rsc": resource_id,
                  "node": node_id,
                  "score": "+INFINITY",
