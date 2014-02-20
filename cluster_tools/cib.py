@@ -255,7 +255,6 @@ class CIB(object):
         self._communicator.modify_attr(resource_id, "is-managed", "false")
 
     def migrate_resource(self, resource_id, node_id):
-        self.remove_loc_constraints(resource_id)
         self._communicator.migrate_resource(resource_id, node_id)
 
     def get_loc_constraints(self, id):

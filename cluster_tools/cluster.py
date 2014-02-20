@@ -52,7 +52,7 @@ class BaseResource(object):
         self._cib.create_loc_constraint(self.id, node.id)
 
     def remove_loc_constraints(self):
-        self._cib.remove_loc_constraints(self.id)
+        self._cib.remove_loc_constraints_by_resource(self.id)
 
 
 class PrimitiveResource(BaseResource):
