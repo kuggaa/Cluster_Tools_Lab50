@@ -76,10 +76,10 @@ class Communicator(object):
         else:
             response_list = response.split("\n")
             if (Communicator.SUCCESS != response_list[0]):
-                print(response)
-                if (len(response_list) > 1):
-                    err_msg = response_list[1]
-                    raise "OLOLO"
+                print("mgmt response:", response)
+                #if (len(response_list) > 1):
+                #    err_msg = response_list[1]
+                #    raise "OLOLO"
             else:
                 return response_list[1:]
 
