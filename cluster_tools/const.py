@@ -25,6 +25,7 @@ class resource_type(object):
     VOLUME = 7
     GLUSTERD = 8
     IPMI = 9
+    PDU = 10
 
     @staticmethod
     def to_str(res_type):

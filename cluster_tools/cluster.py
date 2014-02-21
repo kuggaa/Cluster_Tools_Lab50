@@ -184,10 +184,6 @@ class Clone(BaseResource):
 
         self.state = self._get_state()
         self.node_id = None
-        for child in self._resources.values():
-            if (const.resource_state.ON == child.state):
-                self.node_id = child.node_id
-                break
 
 
     # TODO: it can be done with 2 passes.

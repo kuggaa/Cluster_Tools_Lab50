@@ -34,7 +34,8 @@ class CIB(object):
                  "Filesystem": const.resource_type.FILESYSTEM,
                  "volume": const.resource_type.VOLUME,
                  "glusterd": const.resource_type.GLUSTERD,
-                 "external/ipmi": const.resource_type.IPMI}
+                 "external/ipmi": const.resource_type.IPMI,
+                 "fence_apc_snmp": const.resource_type.PDU}
 
     @staticmethod
     def _create_attrs_el(resource_el, tag, attrs):
