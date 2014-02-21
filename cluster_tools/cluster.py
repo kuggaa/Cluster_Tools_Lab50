@@ -90,23 +90,13 @@ class VM(PrimitiveResource):
 
 
     def get_vnc_id(self):
-        # Get node.
         if (const.resource_state.ON != self.state):
             raise "OLOLO"
-
-        # Get VM name.
-        conf_path = self._cib.get_attr_val(self.id, "config")
-        splitted_conf_path = conf_path.rsplit("/", 1)
-        if (2 != len(splitted_conf_path)):
-            raise "OLOLO"
-        vm_name = splitted_conf_path[1].replace(".xml", "")
-
-        # Get VNC id.
         p = subprocess.Popen(args=["virsh",
                                    "-c",
                                    "qemu+tcp://%s/system" % (self.node_id),
                                    "vncdisplay",
-                                   vm_name],
+                                   self.id],
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
         out, err = p.communicate()
@@ -289,6 +279,7 @@ class Cluster(object):
 
     def create_vm(self, id, conf_file_path):
         self._cib.create_vm(id, conf_file_path)
+
     def create_dummy(self, id, started=True):
         self._cib.create_dummy(id, started)
 
