@@ -26,6 +26,7 @@ class resource_type(object):
     GLUSTERD = 8
     IPMI = 9
     PDU = 10
+    APACHE = 11
 
     @staticmethod
     def to_str(res_type):
