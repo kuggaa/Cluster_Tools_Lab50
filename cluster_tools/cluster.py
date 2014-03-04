@@ -61,9 +61,9 @@ class PrimitiveResource(BaseResource):
         self.id = resource_id
         self.type = resource_type
         self.state = cib.get_primitive_resource_state(self.id)
-        self.node_id = None
+        self.nodes_ids = []
         if (const.resource_state.ON == self.state):
-            self.node_id = cib.get_resource_node(self.id)
+            self.nodes_ids = [cib.get_resource_node(self.id)]
 
 
     def cleanup(self):
@@ -90,11 +90,11 @@ class VM(PrimitiveResource):
 
 
     def get_vnc_id(self):
-        if (const.resource_state.ON != self.state):
+        if (1 != len(self.nodes_ids)):
             raise "OLOLO"
         p = subprocess.Popen(args=["virsh",
                                    "-c",
-                                   "qemu+tcp://%s/system" % (self.node_id),
+                                   "qemu+tcp://%s/system" % (self.nodes_ids[0]),
                                    "vncdisplay",
                                    self.id],
                              stdout=subprocess.PIPE,
@@ -118,10 +118,10 @@ class Group(BaseResource):
             self._resources[child_id] = build_primitive_resource(child_id, resource_type, cib)
 
         self.state = self._get_state()
-        self.node_id = None
+        self.nodes_ids = []
         for child in self._resources.values():
-            if (const.resource_state.ON == child.state):
-                self.node_id = child.node_id
+            if (len(child.nodes_ids) > 0):
+                self.nodes_ids.append(child.nodes_ids[0])
                 break
 
 
@@ -175,8 +175,9 @@ class Clone(BaseResource):
 
         self.nodes_ids = []
         for child in children.values():
-            if (child.node_id is not None) and (child.node_id not in self.nodes_ids):
-                self.nodes_ids.append(child.node_id)
+            for node_id in child.nodes_ids:
+                if (node_id not in self.nodes_ids):
+                    self.nodes_ids.append(node_id)
 
         self.failed_nodes_ids = []
         for node in nodes.values():
