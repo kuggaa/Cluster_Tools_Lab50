@@ -114,7 +114,8 @@ class Group(BaseResource):
         self._resources = {}
         children_ids = cib.get_group_children(self.id)
         for child_id in children_ids:
-            self._resources[child_id] = build_resource(child_id, cib)
+            resource_type = cib.get_resource_type(child_id)
+            self._resources[child_id] = build_primitive_resource(child_id, resource_type, cib)
 
         self.state = self._get_state()
         self.node_id = None
@@ -161,30 +162,39 @@ class Group(BaseResource):
 
 
 class Clone(BaseResource):
-    def __init__(self, clone_id, cib):
+    def __init__(self, clone_id, cib, nodes):
         self._cib = cib
         self.id = clone_id
         self.type = const.resource_type.CLONE
+        self.children_type = cib.get_clone_type(self.id)
 
-        self._resources = {}
-        children_ids = cib.get_clone_children(self.id)
-        clone_type = cib.get_clone_type(self.id)
-        for child_id in children_ids:
-            self._resources[child_id] = build_primitive_resource(child_id, clone_type, cib)
+        children = {}
+        for child_id in cib.get_clone_children(self.id):
+            children[child_id] = build_primitive_resource(child_id, self.children_type, cib)
+        self.state = self._get_state(children)
 
-        self.state = self._get_state()
+        self.nodes_ids = []
+        for child in children.values():
+            if (child.node_id is not None) and (child.node_id not in self.nodes_ids):
+                self.nodes_ids.append(child.node_id)
+
+        self.failed_nodes_ids = []
+        for node in nodes.values():
+            if node.id not in self.nodes_ids:
+                self.failed_nodes_ids.append(node.id)
+
+        # TODO: get rid of it.
         self.node_id = None
 
 
-    # TODO: it can be done with 2 passes.
-    def _get_state(self):
+    def _get_state(self, children):
         states_priority = [const.resource_state.ON,
                            const.resource_state.STARTING,
                            const.resource_state.STOPPING,
                            const.resource_state.FAILED,
                            const.resource_state.UNMANAGED]
         for state in states_priority:
-            for child in self._resources.values():
+            for child in children.values():
                 if (state == child.state):
                     return state
         return const.resource_state.OFF
@@ -219,12 +229,12 @@ def build_primitive_resource(resource_id, resource_type, cib):
         return PrimitiveResource(resource_id, resource_type, cib)    
 
 
-def build_resource(resource_id, cib):
+def build_resource(resource_id, cib, nodes):
     resource_type = cib.get_resource_type(resource_id)
     if (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
-        return Clone(resource_id, cib)
+        return Clone(resource_id, cib, nodes)
     else:
         return build_primitive_resource(resource_id, resource_type, cib)
 
@@ -245,7 +255,7 @@ class Cluster(object):
         resources = {}
         resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
-            resources[resource_id] = build_resource(resource_id, self._cib)
+            resources[resource_id] = build_resource(resource_id, self._cib, self._nodes)
         self._resources = resources
 
 
