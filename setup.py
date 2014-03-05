@@ -3,10 +3,10 @@
 
 # © ОАО «Северное ПКБ», 2014
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name="cluster-tools",
-      version="0.1.0",
+      version="0.1.6",
       description="библиотека утилит для кластера высокой готовности",
       author="Лаборатория 50",
       author_email="team@lab50.net",
@@ -26,5 +26,5 @@ setup(name="cluster-tools",
       #    'netsnmp',  
       #    ],
       include_package_data=True,
-      packages=["cluster_tools"],
+      packages=find_packages(exclude=["tests"]),
       )

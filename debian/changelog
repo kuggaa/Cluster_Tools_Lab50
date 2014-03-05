@@ -1,3 +1,9 @@
+cluster-tools (0.1.6) testing; urgency=low
+
+  * Исправлен скрипт установки.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 05 Mar 2014 11:49:07 +0400
+
 cluster-tools (0.1.5) testing; urgency=low
 
   * Небольшой рефакторинг классов ресурсов.
