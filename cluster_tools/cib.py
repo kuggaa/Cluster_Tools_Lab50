@@ -239,7 +239,7 @@ class CIB(object):
         resource_type = self.get_resource_type(id)
         # Update group's children.
         if (const.resource_type.GROUP == resource_type):
-            for child_id in self.get_children_ids(id):
+            for child_id in self.get_group_children(id):
                 self._communicator.modify_attr(child_id, "target-role", target_role)
         self._communicator.modify_attr(id, "target-role", target_role)
 
@@ -249,12 +249,11 @@ class CIB(object):
     def stop(self, id):
         self._modify_target_role(id, CIB.STOPPED_ROLE)
 
+    def manage(self, id):
+        self._communicator.modify_attr(id, "is-managed", "true")
 
-    def manage(self, resource_id):
-        self._communicator.modify_attr(resource_id, "is-managed", "true")
-
-    def unmanage(self, resource_id):
-        self._communicator.modify_attr(resource_id, "is-managed", "false")
+    def unmanage(self, id):
+        self._communicator.modify_attr(id, "is-managed", "false")
 
     def migrate_resource(self, resource_id, node_id):
         self._communicator.migrate_resource(resource_id, node_id)

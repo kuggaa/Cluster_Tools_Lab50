@@ -23,6 +23,9 @@ class Configuraster(object):
 
     def get_sections_by_prefix(self, required_prefix):
         for section in self._config.sections():
+            if (":" not in section):
+                continue
+
             prefix, id = section.split(":")
             if (prefix != required_prefix):
                 continue

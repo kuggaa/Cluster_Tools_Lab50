@@ -101,7 +101,7 @@ class VM(PrimitiveResource):
                              stderr=subprocess.PIPE)
         out, err = p.communicate()
         if (len(err) > 0):
-            raise "OLOLO"
+            return None
         return int(out.strip().replace(":", ""))
 
 
