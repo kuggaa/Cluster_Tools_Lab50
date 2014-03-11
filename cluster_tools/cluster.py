@@ -57,6 +57,9 @@ class BaseResource(object):
     def is_group(self):
         return (const.resource_type.GROUP == self.type)
 
+    def is_clone(self):
+        return (const.resource_type.CLONE == self.type)
+
 
 class PrimitiveResource(BaseResource):
     def __init__(self, resource_id, resource_type, cib):
