@@ -54,6 +54,9 @@ class BaseResource(object):
     def remove_loc_constraints(self):
         self._cib.remove_loc_constraints_by_resource(self.id)
 
+    def is_group(self):
+        return (const.resource_type.GROUP == self.type)
+
 
 class PrimitiveResource(BaseResource):
     def __init__(self, resource_id, resource_type, cib):
@@ -65,6 +68,11 @@ class PrimitiveResource(BaseResource):
         if (const.resource_state.ON == self.state):
             self.nodes_ids = [cib.get_resource_node(self.id)]
 
+    def get_raw_type(self):
+        for raw_type, type in CIB.RAW_TYPES.iteritems():
+            if (type == self.type):
+                return raw_type
+        return None
 
     def cleanup(self):
         self._cib.cleanup(self.id)
