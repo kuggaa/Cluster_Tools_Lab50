@@ -111,7 +111,7 @@ class VM(PrimitiveResource):
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
         out, err = p.communicate()
-        if (len(err) > 0):
+        if (0 != p.returncode):
             return None
         return int(out.strip().replace(":", ""))
 
