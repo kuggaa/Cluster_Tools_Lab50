@@ -18,9 +18,12 @@ class Node(object):
 
 
     def enable_standby_mode(self):
-        self._cib.enable_standby_mode(self.id)
+        if (const.node_state.ON == self.state):
+            self._cib.enable_standby_mode(self.id)
+
     def cancel_standby_mode(self):
-        self._cib.cancel_standby_mode(self.id)
+        if (const.node_state.STANDBY == self.state):
+            self._cib.cancel_standby_mode(self.id)
 
 
     def __str__(self):
@@ -31,16 +34,20 @@ class Node(object):
 
 class BaseResource(object):
     def start(self):
-        self._cib.start(self.id)
+        if (const.resource_state.OFF == self.state):
+            self._cib.start(self.id)
 
     def stop(self):
-        self._cib.stop(self.id)
+        if (const.resource_state.OFF != self.state):
+            self._cib.stop(self.id)
 
     def manage(self):
-        self._cib.manage(self.id)
+        if (const.resource_state.UNMANAGED == self.state):
+            self._cib.manage(self.id)
 
     def unmanage(self):
-        self._cib.unmanage(self.id)
+        if (const.resource_state.UNMANAGED != self.state):
+            self._cib.unmanage(self.id)
 
     def migrate(self, node):
         self._cib.migrate_resource(self.id, node.id)

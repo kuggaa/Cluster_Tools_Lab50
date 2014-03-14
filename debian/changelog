@@ -1,3 +1,9 @@
+cluster-tools (0.1.10) testing; urgency=low
+
+  * Пара проверок на здравый смысл.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 14 Mar 2014 16:50:04 +0530
+
 cluster-tools (0.1.9) testing; urgency=low
 
   * returncode вместо err.
