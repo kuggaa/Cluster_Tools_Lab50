@@ -1,3 +1,21 @@
+cluster-tools (0.1.10) testing; urgency=low
+
+  * Пара проверок на здравый смысл.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 14 Mar 2014 16:50:04 +0530
+
+cluster-tools (0.1.9) testing; urgency=low
+
+  * returncode вместо err.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 14 Mar 2014 14:48:01 +0530
+
+cluster-tools (0.1.8) testing; urgency=low
+
+  * Пара вспомогательных функций.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 12 Mar 2014 19:43:40 +0530
+
 cluster-tools (0.1.7) testing; urgency=low
 
   * Мелкий фикс в CIB.
