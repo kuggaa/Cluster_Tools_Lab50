@@ -48,8 +48,8 @@ class BaseResource(object):
     def get_loc_constraints(self):
         return self._cib.get_loc_constraints(self.id)
 
-    def create_loc_constraint(self, node):
-        self._cib.create_loc_constraint(self.id, node.id)
+    def create_loc_constraint(self, node, strict_contraint=False):
+        self._cib.create_loc_constraint(self.id, node.id, strict_contraint)
 
     def remove_loc_constraints(self):
         self._cib.remove_loc_constraints_by_resource(self.id)

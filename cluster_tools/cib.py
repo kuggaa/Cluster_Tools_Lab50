@@ -273,11 +273,11 @@ class CIB(object):
         return nodes_ids
 
 
-    def create_loc_constraint(self, resource_id, node_id):
+    def create_loc_constraint(self, resource_id, node_id, strict_contraint=False):
         self.remove_loc_constraints_by_resource(resource_id)
         attrs = {"rsc": resource_id,
                  "node": node_id,
-                 "score": "+INFINITY",
+                 "score": "+INFINITY" if (strict_contraint) else "1",
                  "id": "%s-location" % (resource_id)}
         SubEl(self._constraints_el, CIB.LOC_CONSTRAINT_TAG, attrs)
         self._communicator.modify(self._constraints_el)
