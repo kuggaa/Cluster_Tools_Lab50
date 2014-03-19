@@ -273,11 +273,13 @@ class Cluster(object):
             nodes[node_id] = Node(node_id, self._cib)
         self._nodes = nodes
 
+        #print("<resources>")
         resources = {}
         resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
             resources[resource_id] = build_resource(resource_id, self._cib, self._nodes)
         self._resources = resources
+        #print("</resources>")
 
 
     def get_nodes(self):

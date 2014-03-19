@@ -357,7 +357,7 @@ class CIB(object):
             if (CIB._is_last_child(group_el, resource_el)):
                 self.remove_loc_constraints_by_resource(group_el.get("id"))
                 self._communicator.remove_resource(group_el)
-                resources_el.remove(group_el)
+                self._resources_el.remove(group_el)
             else:
                 self._communicator.remove_resource(resource_el)
                 group_el.remove(resource_el)
