@@ -328,7 +328,7 @@ class QuickCluster(object):
         pass
 
 
-    def get_nodes(self, id):
+    def get_nodes(self):
         nodes = []
         for node_id in self._cib.get_nodes_ids():
             nodes.append(Node(node_id, self._cib))
