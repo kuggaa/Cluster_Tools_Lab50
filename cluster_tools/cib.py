@@ -193,6 +193,14 @@ class CIB(object):
         self._communicator.modify(self._resources_el)
 
 
+    def is_resource_exists(self, id):
+        if (self._get_group_el(id) is not None):
+            return True
+        if (self._get_clone_el(id) is not None):
+            return True
+        return (self._get_primitive_resource_el(id) is not None)
+
+
     def get_resource_type(self, id):
         """ Returns None in case of fail. """
         if (self._get_group_el(id) is not None):
@@ -201,6 +209,8 @@ class CIB(object):
             return const.resource_type.CLONE
         
         primitive_resource_el = self._get_primitive_resource_el(id)
+        if (primitive_resource_el is None):
+            return None
         primitive_type = primitive_resource_el.get("type")
         if (primitive_type is None):
             tmpl_id = primitive_resource_el.get("template")
@@ -273,11 +283,11 @@ class CIB(object):
         return nodes_ids
 
 
-    def create_loc_constraint(self, resource_id, node_id, strict_contraint=False):
+    def create_loc_constraint(self, resource_id, node_id):
         self.remove_loc_constraints_by_resource(resource_id)
         attrs = {"rsc": resource_id,
                  "node": node_id,
-                 "score": "+INFINITY" if (strict_contraint) else "1",
+                 "score": "+INFINITY",
                  "id": "%s-location" % (resource_id)}
         SubEl(self._constraints_el, CIB.LOC_CONSTRAINT_TAG, attrs)
         self._communicator.modify(self._constraints_el)

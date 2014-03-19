@@ -55,8 +55,8 @@ class BaseResource(object):
     def get_loc_constraints(self):
         return self._cib.get_loc_constraints(self.id)
 
-    def create_loc_constraint(self, node, strict_contraint=False):
-        self._cib.create_loc_constraint(self.id, node.id, strict_contraint)
+    def create_loc_constraint(self, node):
+        self._cib.create_loc_constraint(self.id, node.id)
 
     def remove_loc_constraints(self):
         self._cib.remove_loc_constraints_by_resource(self.id)
@@ -250,7 +250,9 @@ def build_primitive_resource(resource_id, resource_type, cib):
 
 def build_resource(resource_id, cib, nodes):
     resource_type = cib.get_resource_type(resource_id)
-    if (const.resource_type.GROUP == resource_type):
+    if (resource_type is None):
+        return None
+    elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
         return Clone(resource_id, cib, nodes)
@@ -317,3 +319,36 @@ class Cluster(object):
 
     def move_resources_to_group(self, group_id, resources_ids):
         self._cib.move_resources_to_group(group_id, resources_ids)
+
+
+class QuickCluster(object):
+    def __init__(self, host, login, password):
+        self._cib = CIB(host, login, password)
+
+
+    def get_node(self, id):
+        pass
+
+
+    def get_resource(self, id):
+        self._cib.update()
+        nodes = {}
+        for node_id in self._cib.get_nodes_ids():
+            nodes[node_id] = Node(node_id, self._cib)
+
+        self._cib.update()
+        return build_resource(id, self._cib, nodes)
+
+
+    def update(self):
+        pass
+
+
+    def create_vm(self, id, conf_file_path):
+        self._cib.create_vm(id, conf_file_path)
+
+    def create_dummy(self, id, started=True):
+        self._cib.create_dummy(id, started)
+
+    def create_group(self, group_id, children_ids, started=True):
+        self._cib.create_group(group_id, children_ids, started)
