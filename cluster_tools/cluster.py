@@ -279,11 +279,13 @@ class Cluster(object):
             nodes[node_id] = Node(node_id, self._cib)
         self._nodes = nodes
 
+        #print("<resources>")
         resources = {}
         resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
             resources[resource_id] = build_resource(resource_id, self._cib, self._nodes)
         self._resources = resources
+        #print("</resources>")
 
 
     def get_nodes(self):
@@ -323,21 +325,25 @@ class Cluster(object):
     def create_group(self, group_id, children_ids, started=True):
         self._cib.create_group(group_id, children_ids, started)
 
-    def move_resources_to_group(self, group_id, resources_ids):
-        self._cib.move_resources_to_group(group_id, resources_ids)
-
 
 class QuickCluster(object):
     def __init__(self, host, login, password):
         self._cib = CIB(host, login, password)
+        self._cib.update()
 
 
     def get_node(self, id):
         pass
 
 
+    def get_nodes(self):
+        nodes = []
+        for node_id in self._cib.get_nodes_ids():
+            nodes.append(Node(node_id, self._cib))
+        return nodes
+
+
     def get_resource(self, id):
-        self._cib.update()
         nodes = {}
         for node_id in self._cib.get_nodes_ids():
             nodes[node_id] = Node(node_id, self._cib)
