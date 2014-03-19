@@ -167,6 +167,12 @@ class Group(BaseResource):
     def get_resources_qty(self):
         return len(self._resources)
 
+    def check_vm_childs(self):
+        if len(self._resources) == 0:
+            return False
+        else:
+            return self._resources.values()[0].type == const.resource_type.VM
+
     def set_running_state(self, resource_is_running):
         for resource in self._resources.values():
             if (const.resource_state.NO_MONITORING == resource.state):
