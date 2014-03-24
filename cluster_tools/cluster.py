@@ -325,9 +325,14 @@ class QuickCluster(object):
         self._cib = CIB(host, login, password)
         self._cib.update()
 
+        nodes = {}
+        for node_id in self._cib.get_nodes_ids():
+            nodes[node_id] = Node(node_id, self._cib)
+        self._nodes = nodes
+
 
     def get_node(self, id):
-        pass
+        return self._nodes.get(node_id, None)
 
 
     def get_nodes(self):
@@ -338,12 +343,7 @@ class QuickCluster(object):
 
 
     def get_resource(self, id):
-        nodes = {}
-        for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib)
-
-        self._cib.update()
-        return build_resource(id, self._cib, nodes)
+        return build_resource(id, self._cib, self._nodes)
 
 
     def update(self):
