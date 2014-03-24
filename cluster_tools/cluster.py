@@ -332,7 +332,7 @@ class QuickCluster(object):
 
 
     def get_node(self, id):
-        return self._nodes.get(node_id, None)
+        return self._nodes.get(id, None)
 
 
     def get_nodes(self):
