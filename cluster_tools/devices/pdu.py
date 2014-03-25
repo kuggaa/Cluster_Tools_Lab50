@@ -34,26 +34,26 @@ class PDU(object):
             raise DeviceError(self.id)
 
 
-    def is_connected(self, device):
-        return (device.id in self._outlets)
+    def is_connected(self, device_id):
+        return (device_id in self._outlets)
 
 
-    def off(self, device):
-        outlet = self._outlets.get(device.id, None)
+    def off(self, device_id):
+        outlet = self._outlets.get(device_id, None)
         if (outlet is None):
             raise DeviceError(self.id)
         self._perform_cmd(PDU.action.OFF, outlet)
 
 
-    def on(self, device):
-        outlet = self._outlets.get(device.id, None)
+    def on(self, device_id):
+        outlet = self._outlets.get(device_id, None)
         if (outlet is None):
             raise DeviceError(self.id)
         self._perform_cmd(PDU.action.ON, outlet)
 
 
-    def reboot(self, device):
-        outlet = self._outlets.get(device.id, None)
+    def reboot(self, device_id):
+        outlet = self._outlets.get(device_id, None)
         if (outlet is None):
             raise DeviceError(self.id)
         self._perform_cmd(PDU.action.REBOOT, outlet)

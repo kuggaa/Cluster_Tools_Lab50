@@ -36,7 +36,7 @@ class Node(object):
         """ Returns False in case of fail. """
         # Off.
         for pdu in self._devices_rep.pdu_devices.values():
-            if (pdu.is_connected(self)):
+            if (pdu.is_connected(self.id)):
                 try:
                     pdu.off(self.id)
                 except DeviceError:
@@ -46,7 +46,7 @@ class Node(object):
         # Now on.
         ok = False
         for pdu in self._devices_rep.pdu_devices.values():
-            if (pdu.is_connected(self)):
+            if (pdu.is_connected(self.id)):
                 try:
                     pdu.on(self.id)
                     ok = True
@@ -56,8 +56,9 @@ class Node(object):
 
 
     def on(self):
-        if not (self._on_with_ipmi() or self._on_with_pdu()):
-            raise DeviceError()
+        if (const.node_state.OFF == self.state):
+            if not (self._on_with_ipmi() or self._on_with_pdu()):
+                raise DeviceError()
 
 
     def _off_with_ipmi(self):
@@ -88,8 +89,9 @@ class Node(object):
 
 
     def off(self):
-        if not (self._off_with_ipmi() or self._off_with_pdu()):
-            raise DeviceError()
+        if (const.node_state.OFF != self.state):
+            if not (self._off_with_ipmi() or self._off_with_pdu()):
+                raise DeviceError()
 
 
     def enable_standby_mode(self):
