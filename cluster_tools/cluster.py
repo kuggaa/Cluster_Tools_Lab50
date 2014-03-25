@@ -337,66 +337,6 @@ def build_resource(resource_id, cib, nodes):
         return build_primitive_resource(resource_id, resource_type, cib)
 
 
-class Cluster(object):
-    def __init__(self, host, login, password):
-        self._cib = CIB(host, login, password)
-
-
-    def update(self, devices_rep):
-        self._cib.update()
-
-        nodes = {}
-        for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib, devices_rep)
-        self._nodes = nodes
-
-        #print("<resources>")
-        resources = {}
-        resources_ids = self._cib.get_root_resources_ids()
-        for resource_id in resources_ids:
-            resources[resource_id] = build_resource(resource_id, self._cib, self._nodes)
-        self._resources = resources
-        #print("</resources>")
-
-
-    def get_nodes(self):
-        for node in self._nodes.values():
-            yield node
-
-
-    def get_node(self, node_id):
-        return self._nodes.get(node_id, None)
-
-
-    def get_resources(self):
-        for resource in self._resources.values():
-            yield resource
-
-
-    def get_resource(self, resource_id):
-        """ Returns None in case of fail. """
-        resource = self._resources.get(resource_id, None)
-        if (resource is not None):
-            return resource
-
-        # Search in groups.
-        for resource in self._resources.values():
-            if (const.resource_type.GROUP == resource.type):
-                child_resource = resource.get_resource(resource_id)
-                if (child_resource is not None):
-                    return child_resource
-        return None
-
-    def create_vm(self, id, conf_file_path):
-        self._cib.create_vm(id, conf_file_path)
-
-    def create_dummy(self, id, started=True):
-        self._cib.create_dummy(id, started)
-
-    def create_group(self, group_id, children_ids, started=True):
-        self._cib.create_group(group_id, children_ids, started)
-
-
 class QuickCluster(object):
     def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
@@ -408,14 +348,18 @@ class QuickCluster(object):
         self._nodes = nodes
 
 
-    def get_node(self, id):
-        return self._nodes.get(id, None)
-
-
     def get_nodes(self):
         for node in self._nodes.values():
             yield node
 
+    def get_node(self, id):
+        return self._nodes.get(id, None)
+
+
+    def get_resources(self):
+        resources_ids = self._cib.get_root_resources_ids()
+        for resource_id in resources_ids:
+            yield build_resource(resource_id, self._cib, self._nodes)
 
     def get_resource(self, id):
         return build_resource(id, self._cib, self._nodes)
