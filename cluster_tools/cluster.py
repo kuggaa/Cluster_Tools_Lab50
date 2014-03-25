@@ -337,7 +337,7 @@ def build_resource(resource_id, cib, nodes):
         return build_primitive_resource(resource_id, resource_type, cib)
 
 
-class QuickCluster(object):
+class Cluster(object):
     def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
         self._cib.update()
