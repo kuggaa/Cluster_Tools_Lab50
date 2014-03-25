@@ -6,15 +6,90 @@ import subprocess
 
 
 class Node(object):
-    def __init__(self, node_id, cib):
+    def __init__(self, id, cib, devices_rep):
+        self.id = id
         self._cib = cib
-        self.id = node_id
-        self.state = cib.get_node_state(node_id)
+        self._devices_rep = devices_rep
+
+        self.state = cib.get_node_state(id)
         if (const.node_state.OFF == self.state):
             self.ip = None
         else:
             # TODO: hmmmmmmmmmmmmmmmmmmmmmm...
             self.ip = socket.gethostbyname(self.id)
+
+
+    def _on_with_ipmi(self):
+        """ Returns False in case of fail."""
+        ipmi = self._devices_rep.get_ipmi_for_node(self.id)
+        if (ipmi is None):
+            return False
+        try:
+            ipmi.on()
+            return True
+        except DeviceError:
+            print("IPMI fail while switching ON.")
+            return False
+
+
+    def _on_with_pdu(self):
+        """ Returns False in case of fail. """
+        # Off.
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self)):
+                try:
+                    pdu.off(self.id)
+                except DeviceError:
+                    pass
+        time.sleep(0.5)
+
+        # Now on.
+        ok = False
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self)):
+                try:
+                    pdu.on(self.id)
+                    ok = True
+                except DeviceError:
+                    pass
+        return ok
+
+
+    def on(self):
+        if not (self._on_with_ipmi() or self._on_with_pdu()):
+            raise DeviceError()
+
+
+    def _off_with_ipmi(self):
+        """ Returns False in case of fail. """
+        ipmi = self._devices_rep.get_ipmi_for_node(self.id)
+        if (ipmi is None):
+            return False
+
+        try:
+            ipmi.off()
+            return True
+        except DeviceError:
+            print("IPMI fail while switching OFF.")
+            return False
+
+
+    # Returns False in case of fail.
+    def _off_with_pdu(self):
+        ok = False
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self.id)):
+                try:
+                    pdu.off(self.id)
+                    ok = True
+                except DeviceError:
+                    pass
+        return ok
+
+
+    def off(self):
+        if not (self._off_with_ipmi() or self._off_with_pdu()):
+            raise DeviceError()
 
 
     def enable_standby_mode(self):
@@ -265,12 +340,12 @@ class Cluster(object):
         self._cib = CIB(host, login, password)
 
 
-    def update(self):
+    def update(self, devices_rep):
         self._cib.update()
 
         nodes = {}
         for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib)
+            nodes[node_id] = Node(node_id, self._cib, devices_rep)
         self._nodes = nodes
 
         #print("<resources>")
@@ -321,13 +396,13 @@ class Cluster(object):
 
 
 class QuickCluster(object):
-    def __init__(self, host, login, password):
+    def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
         self._cib.update()
 
         nodes = {}
         for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib)
+            nodes[node_id] = Node(node_id, self._cib, devices_rep)
         self._nodes = nodes
 
 
