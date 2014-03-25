@@ -413,10 +413,8 @@ class QuickCluster(object):
 
 
     def get_nodes(self):
-        nodes = []
-        for node_id in self._cib.get_nodes_ids():
-            nodes.append(Node(node_id, self._cib))
-        return nodes
+        for node in self._nodes.values():
+            yield node
 
 
     def get_resource(self, id):
