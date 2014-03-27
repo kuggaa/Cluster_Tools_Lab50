@@ -1,3 +1,10 @@
+cluster-tools (0.1.11) testing; urgency=low
+
+  * Non-maintainer upload.
+  * Команды ON и OFF теперь тут.
+
+ -- user <user@SgibnevGY@mail50.stend>  Thu, 27 Mar 2014 17:51:07 +0400
+
 cluster-tools (0.1.10) testing; urgency=low
 
   * Пара проверок на здравый смысл.
