@@ -332,6 +332,8 @@ def build_resource(resource_id, cib, nodes):
     elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
+        if (const.resource_type.GROUP == cib.get_clone_type(self.id)):
+            return None
         return Clone(resource_id, cib, nodes)
     else:
         return build_primitive_resource(resource_id, resource_type, cib)
@@ -359,7 +361,9 @@ class Cluster(object):
     def get_resources(self):
         resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
-            yield build_resource(resource_id, self._cib, self._nodes)
+            res = build_resource(resource_id, self._cib, self._nodes)
+            if (res is not None):
+                yield res
 
     def get_resource(self, id):
         return build_resource(id, self._cib, self._nodes)

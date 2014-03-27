@@ -83,7 +83,7 @@ class CIB(object):
 
     def _get_group_el(self, id):
         """ Returns None in case of fail. """
-        return self._resources_el.find("./group[@id='%s']" % (id))
+        return self._resources_el.find(".//group[@id='%s']" % (id))
 
     def _get_clone_el(self, id):
         """ Returns None in case of fail. """
