@@ -1,3 +1,9 @@
+cluster-tools (0.1.12) testing; urgency=low
+
+  * Забытый файлик.
+
+ -- user <user@SgibnevGY@mail50.stend>  Thu, 27 Mar 2014 18:20:33 +0400
+
 cluster-tools (0.1.11) testing; urgency=low
 
   * Non-maintainer upload.
