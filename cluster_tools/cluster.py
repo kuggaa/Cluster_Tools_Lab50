@@ -332,7 +332,7 @@ def build_resource(resource_id, cib, nodes):
     elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
-        if (const.resource_type.GROUP == cib.get_clone_type(self.id)):
+        if (const.resource_type.GROUP == cib.get_clone_type(resource_id)):
             return None
         return Clone(resource_id, cib, nodes)
     else:
