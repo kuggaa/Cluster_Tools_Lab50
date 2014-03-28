@@ -1,3 +1,34 @@
+cluster-tools (0.1.15) testing; urgency=low
+
+  * Еще горячий фикс.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 28 Mar 2014 11:14:02 +0400
+
+cluster-tools (0.1.14) testing; urgency=low
+
+  * Горячий фикс.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 28 Mar 2014 11:07:17 +0400
+
+cluster-tools (0.1.13) testing; urgency=low
+
+  * Пока игнорим клонированные группы.
+
+ -- user <user@SgibnevGY@mail50.stend>  Thu, 27 Mar 2014 19:15:18 +0400
+
+cluster-tools (0.1.12) testing; urgency=low
+
+  * Забытый файлик.
+
+ -- user <user@SgibnevGY@mail50.stend>  Thu, 27 Mar 2014 18:20:33 +0400
+
+cluster-tools (0.1.11) testing; urgency=low
+
+  * Non-maintainer upload.
+  * Команды ON и OFF теперь тут.
+
+ -- user <user@SgibnevGY@mail50.stend>  Thu, 27 Mar 2014 17:51:07 +0400
+
 cluster-tools (0.1.10) testing; urgency=low
 
   * Пара проверок на здравый смысл.

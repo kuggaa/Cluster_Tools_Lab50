@@ -6,15 +6,92 @@ import subprocess
 
 
 class Node(object):
-    def __init__(self, node_id, cib):
+    def __init__(self, id, cib, devices_rep):
+        self.id = id
         self._cib = cib
-        self.id = node_id
-        self.state = cib.get_node_state(node_id)
+        self._devices_rep = devices_rep
+
+        self.state = cib.get_node_state(id)
         if (const.node_state.OFF == self.state):
             self.ip = None
         else:
             # TODO: hmmmmmmmmmmmmmmmmmmmmmm...
             self.ip = socket.gethostbyname(self.id)
+
+
+    def _on_with_ipmi(self):
+        """ Returns False in case of fail."""
+        ipmi = self._devices_rep.get_ipmi_for_node(self.id)
+        if (ipmi is None):
+            return False
+        try:
+            ipmi.on()
+            return True
+        except DeviceError:
+            print("IPMI fail while switching ON.")
+            return False
+
+
+    def _on_with_pdu(self):
+        """ Returns False in case of fail. """
+        # Off.
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self.id)):
+                try:
+                    pdu.off(self.id)
+                except DeviceError:
+                    pass
+        time.sleep(0.5)
+
+        # Now on.
+        ok = False
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self.id)):
+                try:
+                    pdu.on(self.id)
+                    ok = True
+                except DeviceError:
+                    pass
+        return ok
+
+
+    def on(self):
+        if (const.node_state.OFF == self.state):
+            if not (self._on_with_ipmi() or self._on_with_pdu()):
+                raise DeviceError()
+
+
+    def _off_with_ipmi(self):
+        """ Returns False in case of fail. """
+        ipmi = self._devices_rep.get_ipmi_for_node(self.id)
+        if (ipmi is None):
+            return False
+
+        try:
+            ipmi.off()
+            return True
+        except DeviceError:
+            print("IPMI fail while switching OFF.")
+            return False
+
+
+    # Returns False in case of fail.
+    def _off_with_pdu(self):
+        ok = False
+        for pdu in self._devices_rep.pdu_devices.values():
+            if (pdu.is_connected(self.id)):
+                try:
+                    pdu.off(self.id)
+                    ok = True
+                except DeviceError:
+                    pass
+        return ok
+
+
+    def off(self):
+        if (const.node_state.OFF != self.state):
+            if not (self._off_with_ipmi() or self._off_with_pdu()):
+                raise DeviceError()
 
 
     def enable_standby_mode(self):
@@ -261,95 +338,41 @@ def build_resource(resource_id, cib, nodes):
     elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
+        if (const.resource_type.GROUP == cib.get_clone_type(resource_id)):
+            return None
         return Clone(resource_id, cib, nodes)
     else:
         return build_primitive_resource(resource_id, resource_type, cib)
 
 
 class Cluster(object):
-    def __init__(self, host, login, password):
+    def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
-
-
-    def update(self):
         self._cib.update()
 
         nodes = {}
         for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib)
+            nodes[node_id] = Node(node_id, self._cib, devices_rep)
         self._nodes = nodes
-
-        #print("<resources>")
-        resources = {}
-        resources_ids = self._cib.get_root_resources_ids()
-        for resource_id in resources_ids:
-            resources[resource_id] = build_resource(resource_id, self._cib, self._nodes)
-        self._resources = resources
-        #print("</resources>")
 
 
     def get_nodes(self):
         for node in self._nodes.values():
             yield node
 
-
-    def get_node(self, node_id):
-        return self._nodes.get(node_id, None)
+    def get_node(self, id):
+        return self._nodes.get(id, None)
 
 
     def get_resources(self):
-        for resource in self._resources.values():
-            yield resource
-
-
-    def get_resource(self, resource_id):
-        """ Returns None in case of fail. """
-        resource = self._resources.get(resource_id, None)
-        if (resource is not None):
-            return resource
-
-        # Search in groups.
-        for resource in self._resources.values():
-            if (const.resource_type.GROUP == resource.type):
-                child_resource = resource.get_resource(resource_id)
-                if (child_resource is not None):
-                    return child_resource
-        return None
-
-    def create_vm(self, id, conf_file_path):
-        self._cib.create_vm(id, conf_file_path)
-
-    def create_dummy(self, id, started=True):
-        self._cib.create_dummy(id, started)
-
-    def create_group(self, group_id, children_ids, started=True):
-        self._cib.create_group(group_id, children_ids, started)
-
-
-class QuickCluster(object):
-    def __init__(self, host, login, password):
-        self._cib = CIB(host, login, password)
-        self._cib.update()
-
-
-    def get_node(self, id):
-        pass
-
-
-    def get_nodes(self):
-        nodes = []
-        for node_id in self._cib.get_nodes_ids():
-            nodes.append(Node(node_id, self._cib))
-        return nodes
-
+        resources_ids = self._cib.get_root_resources_ids()
+        for resource_id in resources_ids:
+            res = build_resource(resource_id, self._cib, self._nodes)
+            if (res is not None):
+                yield res
 
     def get_resource(self, id):
-        nodes = {}
-        for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib)
-
-        self._cib.update()
-        return build_resource(id, self._cib, nodes)
+        return build_resource(id, self._cib, self._nodes)
 
 
     def update(self):
