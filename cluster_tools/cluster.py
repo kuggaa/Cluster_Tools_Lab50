@@ -109,6 +109,13 @@ class Node(object):
         return self.__str__()
 
 
+STATES_PRIORITY = [const.resource_state.ON,
+                   const.resource_state.STARTING,
+                   const.resource_state.STOPPING,
+                   const.resource_state.FAILED,
+                   const.resource_state.UNMANAGED]
+
+
 class BaseResource(object):
     def start(self):
         if (const.resource_state.OFF == self.state):
@@ -256,6 +263,94 @@ class Group(BaseResource):
             resource.cleanup()
 
 
+class BaseClone(object):
+    pass
+
+
+class ClonedPrimitive(BaseClone):
+    def __init__(self, clone_id, type_of_cloned_primitive, cib, nodes):
+        self._cib = cib
+        self.id = clone_id
+        self.type = const.resource_type.CLONE
+        self.type_of_cloned_resource = type_of_cloned_primitive
+
+        self.state = const.resource_state.ON
+        self.nodes_ids = []
+        self.failed_nodes_ids = []
+
+
+class ChildOfClonedGroup(object):
+    def __init__(self, id, cib, nodes, indexes_of_cloned_groups):
+        self.id = id
+        self.type = cib.get_resource_type(self.id)
+
+        states = {}
+        for ind in indexes_of_cloned_groups:
+            cloned_child_id = self.id + ":" + ind
+            state = cib.get_primitive_resource_state(cloned_child_id)
+            states[cloned_child_id] = state
+        self.state = self._get_state(states)
+
+        self.nodes_ids = []
+        self.failed_nodes_ids = []
+        for cloned_child_id, state in states.iteritems():
+            if (const.resource_state.ON == state):
+                self.nodes_ids += [cib.get_resource_node(cloned_child_id)]
+
+        print(self.id, self.state, self.nodes_ids)
+
+
+    def _get_state(self, states):
+        for state in STATES_PRIORITY:
+            for clone_state in states.values():
+                if (state == clone_state):
+                    return state
+        return const.resource_state.OFF
+
+
+class ClonedGroup(BaseClone):
+    def __init__(self, clone_id, cib, nodes):
+        self._cib = cib
+        self.id = clone_id
+        self.type = const.resource_type.CLONE
+        self.type_of_cloned_resource = const.resource_type.GROUP
+
+        indexes_of_cloned_groups = []
+        for cloned_group_id in cib.get_clone_children(self.id):
+            id, index = cloned_group_id.split(":")
+            indexes_of_cloned_groups.append(index)
+
+        self.children = []
+        for id in cib.get_children_of_cloned_group(self.id):
+            self.children.append(ChildOfClonedGroup(id,
+                                                    cib,
+                                                    nodes,
+                                                    indexes_of_cloned_groups))
+
+        self.state = self._get_state()
+        #self.nodes_ids = []
+        #self.failed_nodes_ids = []
+        #for node in nodes.values():
+        #    ok = True
+        #    for child in self.children:
+        #        if (node.id not in child.nodes_ids):
+        #            ok = False
+        #            break
+        #    if (ok):
+        #        self.nodes_ids.append(node.id)
+        #    else:
+        #        self.failed_nodes_ids.append(node.id)
+
+
+    def _get_state(self):
+        for state in STATES_PRIORITY:
+            for child in self.children:
+                if (state == child.state):
+                    return state
+        return const.resource_state.OFF
+
+
+
 class Clone(BaseResource):
     def __init__(self, clone_id, cib, nodes):
         self._cib = cib
@@ -322,19 +417,26 @@ def build_primitive_resource(resource_id, resource_type, cib):
     if (const.resource_type.VM == resource_type):
         return VM(resource_id, cib)
     else:
-        return PrimitiveResource(resource_id, resource_type, cib)    
+        return PrimitiveResource(resource_id, resource_type, cib)
+
+
+def build_clone(clone_id, cib, nodes):
+    type_of_cloned_resource = cib.get_clone_type(clone_id)
+    if (const.resource_type.GROUP == type_of_cloned_resource):
+        return ClonedGroup(clone_id, cib, nodes)
+    else:
+        return ClonedPrimitive(clone_id, type_of_cloned_resource, cib, nodes)
 
 
 def build_resource(resource_id, cib, nodes):
+    """ Build any resource: group, clone or primitive. """
     resource_type = cib.get_resource_type(resource_id)
     if (resource_type is None):
         return None
     elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
-        if (const.resource_type.GROUP == cib.get_clone_type(self.id)):
-            return None
-        return Clone(resource_id, cib, nodes)
+        return build_clone(resource_id, cib, nodes)
     else:
         return build_primitive_resource(resource_id, resource_type, cib)
 

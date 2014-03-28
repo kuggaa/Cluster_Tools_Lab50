@@ -83,7 +83,7 @@ class CIB(object):
 
     def _get_group_el(self, id):
         """ Returns None in case of fail. """
-        return self._resources_el.find(".//group[@id='%s']" % (id))
+        return self._resources_el.find("./group[@id='%s']" % (id))
 
     def _get_clone_el(self, id):
         """ Returns None in case of fail. """
@@ -150,6 +150,14 @@ class CIB(object):
         """ Returns list of ids. """ 
         group_el = self._get_group_el(group_id)
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
+
+
+    def get_children_of_cloned_group(self, clone_id):
+        """ Returns list of ids. """ 
+        clone_el = self._get_clone_el(clone_id)
+        group_el = clone_el.find(CIB.GROUP_TAG)
+        return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
+
 
     def get_clone_children(self, clone_id):
         """ Returns list of ids. """ 
@@ -223,8 +231,11 @@ class CIB(object):
 
     def get_clone_type(self, id):
         clone_el = self._get_clone_el(id)
-        raw_clone_type = clone_el.find(CIB.PRIMITIVE_RESOURCE_TAG).get("type")
-        return CIB.RAW_TYPES.get(raw_clone_type)
+        cloned_primitive_el = clone_el.find(CIB.PRIMITIVE_RESOURCE_TAG)
+        if (cloned_primitive_el is None):
+            return const.resource_type.GROUP
+        else:
+            return CIB.RAW_TYPES.get(cloned_primitive_el.get("type"))
 
 
     def get_primitive_resource_state(self, id):
