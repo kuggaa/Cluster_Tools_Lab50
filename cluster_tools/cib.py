@@ -223,8 +223,11 @@ class CIB(object):
 
     def get_clone_type(self, id):
         clone_el = self._get_clone_el(id)
-        raw_clone_type = clone_el.find(CIB.PRIMITIVE_RESOURCE_TAG).get("type")
-        return CIB.RAW_TYPES.get(raw_clone_type)
+        cloned_primitive_el = clone_el.find(CIB.PRIMITIVE_RESOURCE_TAG)
+        if (cloned_primitive_el is None):
+            return const.resource_type.GROUP
+        else:
+            return CIB.RAW_TYPES.get(cloned_primitive_el.get("type"))
 
 
     def get_primitive_resource_state(self, id):
