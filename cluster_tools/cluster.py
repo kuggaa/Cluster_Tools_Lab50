@@ -298,12 +298,10 @@ class ChildOfClonedGroup(object):
         self.state = self._get_state(states)
 
         self.nodes_ids = []
-        self.failed_nodes_ids = []
         for cloned_child_id, state in states.iteritems():
             if (const.resource_state.ON == state):
-                self.nodes_ids += [cib.get_resource_node(cloned_child_id)]
-
-        print(self.id, self.state, self.nodes_ids)
+                self.nodes_ids.append(cib.get_resource_node(cloned_child_id))
+        self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
 
 
     def _get_state(self, states):
@@ -334,18 +332,6 @@ class ClonedGroup(BaseClone):
                                                     indexes_of_cloned_groups))
 
         self.state = self._get_state()
-        #self.nodes_ids = []
-        #self.failed_nodes_ids = []
-        #for node in nodes.values():
-        #    ok = True
-        #    for child in self.children:
-        #        if (node.id not in child.nodes_ids):
-        #            ok = False
-        #            break
-        #    if (ok):
-        #        self.nodes_ids.append(node.id)
-        #    else:
-        #        self.failed_nodes_ids.append(node.id)
 
 
     def _get_state(self):
@@ -426,21 +412,21 @@ def build_primitive_resource(resource_id, resource_type, cib):
         return PrimitiveResource(resource_id, resource_type, cib)
 
 
-def build_resource(resource_id, cib, nodes):
+def build_resource(id, cib, nodes):
     """ Build any resource: group, clone or primitive. """
-    resource_type = cib.get_resource_type(resource_id)
+    resource_type = cib.get_resource_type(id)
     if (resource_type is None):
         return None
     elif (const.resource_type.GROUP == resource_type):
-        return Group(resource_id, cib)
+        return Group(id, cib)
     elif (const.resource_type.CLONE == resource_type):
-        type_of_cloned_resource = cib.get_clone_type(clone_id)
+        type_of_cloned_resource = cib.get_clone_type(id)
         if (const.resource_type.GROUP == type_of_cloned_resource):
-            return ClonedGroup(clone_id, cib, nodes)
+            return ClonedGroup(id, cib, nodes)
         else:
-            return ClonedPrimitive(clone_id, type_of_cloned_resource, cib, nodes)
+            return ClonedPrimitive(id, type_of_cloned_resource, cib, nodes)
     else:
-        return build_primitive_resource(resource_id, resource_type, cib)
+        return build_primitive_resource(id, resource_type, cib)
 
 
 class Cluster(object):
