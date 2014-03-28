@@ -251,6 +251,12 @@ class Group(BaseResource):
     def get_resources_qty(self):
         return len(self._resources)
 
+    def check_vm_childs(self):
+        if len(self._resources) == 0:
+            return False
+        else:
+            return self._resources.values()[0].type == const.resource_type.VM
+
     def set_running_state(self, resource_is_running):
         for resource in self._resources.values():
             if (const.resource_state.NO_MONITORING == resource.state):
@@ -420,14 +426,6 @@ def build_primitive_resource(resource_id, resource_type, cib):
         return PrimitiveResource(resource_id, resource_type, cib)
 
 
-def build_clone(clone_id, cib, nodes):
-    type_of_cloned_resource = cib.get_clone_type(clone_id)
-    if (const.resource_type.GROUP == type_of_cloned_resource):
-        return ClonedGroup(clone_id, cib, nodes)
-    else:
-        return ClonedPrimitive(clone_id, type_of_cloned_resource, cib, nodes)
-
-
 def build_resource(resource_id, cib, nodes):
     """ Build any resource: group, clone or primitive. """
     resource_type = cib.get_resource_type(resource_id)
@@ -436,7 +434,11 @@ def build_resource(resource_id, cib, nodes):
     elif (const.resource_type.GROUP == resource_type):
         return Group(resource_id, cib)
     elif (const.resource_type.CLONE == resource_type):
-        return build_clone(resource_id, cib, nodes)
+        type_of_cloned_resource = cib.get_clone_type(clone_id)
+        if (const.resource_type.GROUP == type_of_cloned_resource):
+            return ClonedGroup(clone_id, cib, nodes)
+        else:
+            return ClonedPrimitive(clone_id, type_of_cloned_resource, cib, nodes)
     else:
         return build_primitive_resource(resource_id, resource_type, cib)
 
