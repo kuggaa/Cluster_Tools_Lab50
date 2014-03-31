@@ -27,6 +27,15 @@ class resource_type(object):
     IPMI = 9
     PDU = 10
     APACHE = 11
+    LDAP_DAEMON = 12
+    ALD_CACHE_DAEMON = 13
+    KERBEROS_KEY_SERVER = 14
+    KERBEROS_DB_PROPAGATION = 15
+    KERBEROS_MASTER_SERVER = 16
+    ALD_DAEMON = 17
+    NAME_SERVICE_CACHE_DAEMON = 18
+    OPENLDAP_SERVER = 19
+
 
     @staticmethod
     def to_str(res_type):

@@ -36,8 +36,18 @@ class CIB(object):
                  "glusterd": const.resource_type.GLUSTERD,
                  "external/ipmi": const.resource_type.IPMI,
                  "fence_apc_snmp": const.resource_type.PDU,
-                 "apache2": const.resource_type.APACHE}
+                 "apache2": const.resource_type.APACHE,
+                 "nslcd": const.resource_type.LDAP_DAEMON,
+                 "aldcd": const.resource_type.ALD_CACHE_DAEMON,
+                 "krb5-kdc": const.resource_type.KERBEROS_KEY_SERVER,
+                 "krb5-prop": const.resource_type.KERBEROS_DB_PROPAGATION,
+                 "krb5-admin-server": const.resource_type.KERBEROS_MASTER_SERVER,
+                 "aldd": const.resource_type.ALD_DAEMON,
+                 "nscd": const.resource_type.NAME_SERVICE_CACHE_DAEMON,
+                 "slapd": const.resource_type.OPENLDAP_SERVER}
 
+                 
+  
     @staticmethod
     def _create_attrs_el(resource_el, tag, attrs):
         id = resource_el.get("id") + "-" + tag

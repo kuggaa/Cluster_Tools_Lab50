@@ -1,3 +1,9 @@
+cluster-tools (0.1.18) testing; urgency=low
+
+  * Новые типы.
+
+ -- Лаборатория 50 <team@lab50.net>  Mon, 31 Mar 2014 17:21:44 +0400
+
 cluster-tools (0.1.17) testing; urgency=low
 
   * Поддержка клонов группы.
