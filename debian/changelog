@@ -1,3 +1,9 @@
+cluster-tools (0.1.19) testing; urgency=low
+
+  * Забытое исключение.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 02 Apr 2014 15:47:44 +0400
+
 cluster-tools (0.1.18) testing; urgency=low
 
   * Новые типы.

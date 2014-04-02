@@ -1,5 +1,6 @@
 import const
 from cib import CIB
+from exceptions import DeviceError
 
 import socket
 import subprocess
