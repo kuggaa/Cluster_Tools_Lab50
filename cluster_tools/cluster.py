@@ -4,6 +4,7 @@ from exceptions import DeviceError
 
 import socket
 import subprocess
+import time
 
 
 class Node(object):
