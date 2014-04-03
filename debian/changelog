@@ -1,3 +1,9 @@
+cluster-tools (0.1.21) testing; urgency=low
+
+  * Выпилены некоторые опции ipmitool.
+
+ -- Лаборатория 50 <team@lab50.net>  Thu, 03 Apr 2014 11:32:50 +0400
+
 cluster-tools (0.1.20) testing; urgency=low
 
   * Забытый импорт.

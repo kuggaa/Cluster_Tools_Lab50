@@ -9,7 +9,7 @@ import subprocess
 
 
 class IPMI(object):
-    CMD = "ipmitool -H %s -I lanplus -U %s -P %s chassis power %s -R 1 -N 1"
+    CMD = "ipmitool -H %s -I lanplus -U %s -P %s chassis power %s"
     SUCCESS_CODE = 0
 
     class action:
