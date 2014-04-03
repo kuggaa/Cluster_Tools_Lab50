@@ -174,7 +174,10 @@ class Group(BaseResource):
 
 
 class BaseClone(object):
-    pass
+    def is_group(self):
+        return False
+    def is_clone(self):
+        return True
 
 
 class ClonedPrimitive(BaseClone):
