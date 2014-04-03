@@ -155,10 +155,12 @@ class BaseResource(object):
 
 
 class PrimitiveResource(BaseResource):
-    def __init__(self, resource_id, resource_type, cib):
+    def __init__(self, id, resource_type, cib, group=None):
         self._cib = cib
-        self.id = resource_id
+        self.id = id
         self.type = resource_type
+        self._group = group
+
         self.state = cib.get_primitive_resource_state(self.id)
         self.nodes_ids = []
         if (const.resource_state.ON == self.state):
@@ -169,6 +171,10 @@ class PrimitiveResource(BaseResource):
             if (type == self.type):
                 return raw_type
         return None
+
+    def create_loc_constraint(self, node):
+        if (self._group is None) or (0 == len(self._group.get_loc_constraints())):
+            self._cib.create_loc_constraint(self.id, node.id)
 
     def cleanup(self):
         self._cib.cleanup(self.id)
@@ -189,8 +195,8 @@ class PrimitiveResource(BaseResource):
 
 
 class VM(PrimitiveResource):
-    def __init__(self, resource_id, cib):
-        PrimitiveResource.__init__(self, resource_id, const.resource_type.VM, cib)
+    def __init__(self, resource_id, cib, group=None):
+        PrimitiveResource.__init__(self, resource_id, const.resource_type.VM, cib, group)
 
 
     def get_vnc_id(self):
@@ -219,7 +225,10 @@ class Group(BaseResource):
         children_ids = cib.get_group_children(self.id)
         for child_id in children_ids:
             resource_type = cib.get_resource_type(child_id)
-            self._resources[child_id] = build_primitive_resource(child_id, resource_type, cib)
+            self._resources[child_id] = build_primitive_resource(child_id,
+                                                                 resource_type,
+                                                                 cib,
+                                                                 self)
 
         self.state = self._get_state()
         self.nodes_ids = []
@@ -260,10 +269,14 @@ class Group(BaseResource):
                 continue
             resource.set_running_state(resource_is_running)
 
+    def create_loc_constraint(self, node):
+        for child in self._resources.values():
+            child.remove_loc_constraints()
+        self._cib.create_loc_constraint(self.id, node.id)
 
     def cleanup(self):
-        for resource in self._resources.values():
-            resource.cleanup()
+        for child in self._resources.values():
+            child.cleanup()
 
 
 class BaseClone(object):
@@ -358,28 +371,11 @@ class ClonedGroup(BaseClone):
         return const.resource_state.OFF
 
 
-def build_primitive_resource(resource_id, resource_type, cib):
+def build_primitive_resource(resource_id, resource_type, cib, group=None):
     if (const.resource_type.VM == resource_type):
-        return VM(resource_id, cib)
+        return VM(resource_id, cib, group)
     else:
-        return PrimitiveResource(resource_id, resource_type, cib)
-
-
-def build_resource(id, cib, nodes):
-    """ Build any resource: group, clone or primitive. """
-    resource_type = cib.get_resource_type(id)
-    if (resource_type is None):
-        return None
-    elif (const.resource_type.GROUP == resource_type):
-        return Group(id, cib)
-    elif (const.resource_type.CLONE == resource_type):
-        type_of_cloned_resource = cib.get_clone_type(id)
-        if (const.resource_type.GROUP == type_of_cloned_resource):
-            return ClonedGroup(id, cib, nodes)
-        else:
-            return ClonedPrimitive(id, type_of_cloned_resource, cib, nodes)
-    else:
-        return build_primitive_resource(id, resource_type, cib)
+        return PrimitiveResource(resource_id, resource_type, cib, group)
 
 
 class Cluster(object):
@@ -392,6 +388,8 @@ class Cluster(object):
             nodes[node_id] = Node(node_id, self._cib, devices_rep)
         self._nodes = nodes
 
+        self._groups = {}
+
 
     def get_nodes(self):
         for node in self._nodes.values():
@@ -401,15 +399,39 @@ class Cluster(object):
         return self._nodes.get(id, None)
 
 
+    def _build_resource(self, id, cib, nodes):
+        """ Build any resource: group, clone or primitive. """
+        resource_type = cib.get_resource_type(id)
+        if (resource_type is None):
+            return None
+        elif (const.resource_type.GROUP == resource_type):
+            return Group(id, cib)
+        elif (const.resource_type.CLONE == resource_type):
+            type_of_cloned_resource = cib.get_clone_type(id)
+            if (const.resource_type.GROUP == type_of_cloned_resource):
+                return ClonedGroup(id, cib, nodes)
+            else:
+                return ClonedPrimitive(id, type_of_cloned_resource, cib, nodes)
+        else:
+            group_id = cib.get_group_by_primitive(id)
+            if (group_id is None):
+                return build_primitive_resource(id, resource_type, cib)
+            else:
+                if (self._groups.get(group_id) is None):
+                    self._groups[group_id] = Group(group_id, cib)
+                return self._groups[group_id].get_resource(id)
+
+
+
     def get_resources(self):
         resources_ids = self._cib.get_root_resources_ids()
         for resource_id in resources_ids:
-            res = build_resource(resource_id, self._cib, self._nodes)
+            res = self._build_resource(resource_id, self._cib, self._nodes)
             if (res is not None):
                 yield res
 
     def get_resource(self, id):
-        return build_resource(id, self._cib, self._nodes)
+        return self._build_resource(id, self._cib, self._nodes)
 
 
     def update(self):

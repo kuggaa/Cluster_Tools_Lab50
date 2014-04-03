@@ -99,8 +99,8 @@ class CIB(object):
         """ Returns None in case of fail. """
         return self._resources_el.find("./clone[@id='%s']" % (id))
 
-    def _get_group_el_by_resource(self, id):
-        """ Returns None for a root resource. """
+    def _get_group_el_by_primitive(self, id):
+        """ Returns None for a root primitive. """
         return self._resources_el.find("./group/primitive[@id='%s']/.." % (id))
 
     def _get_loc_contraints_els_by_resource(self, id):
@@ -161,6 +161,10 @@ class CIB(object):
         group_el = self._get_group_el(group_id)
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
 
+    def get_group_by_primitive(self, primitive_id):
+        """ Returns id of a group (or None for a root primitive). """
+        group_el = self._get_group_el_by_primitive(primitive_id)
+        return None if (group_el is None) else group_el.get("id")
 
     def get_children_of_cloned_group(self, clone_id):
         """ Returns list of ids. """ 
@@ -197,7 +201,7 @@ class CIB(object):
 
         for child_id in children_ids:
             resource_el = self._get_primitive_resource_el(child_id)
-            current_group_el = self._get_group_el_by_resource(child_id)
+            current_group_el = self._get_group_el_by_primitive(child_id)
             if (current_group_el is None):
                 self._resources_el.remove(resource_el)
             else:
@@ -330,7 +334,7 @@ class CIB(object):
         resource_el = self._get_primitive_resource_el(resource_id)
         target_group_el = self._get_group_el(group_id)
 
-        current_group_el = self._get_group_el_by_resource(resource_id)
+        current_group_el = self._get_group_el_by_primitive(resource_id)
         if (current_group_el is None):
             self._resources_el.remove(resource_el)
         else:
@@ -348,7 +352,7 @@ class CIB(object):
     def move_to_root(self, id):
         """ Moves the child resource to root. """
         resource_el = self._get_primitive_resource_el(id)
-        group_el = self._get_group_el_by_resource(id)
+        group_el = self._get_group_el_by_primitive(id)
         if (group_el is None):
             return
         
@@ -368,7 +372,7 @@ class CIB(object):
             return
         self.remove_loc_constraints_by_resource(id)
 
-        group_el = self._get_group_el_by_resource(id)
+        group_el = self._get_group_el_by_primitive(id)
         # Process root primitive resource.
         if (group_el is None):
             self._communicator.remove_resource(resource_el)

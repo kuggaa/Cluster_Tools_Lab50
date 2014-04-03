@@ -1,3 +1,9 @@
+cluster-tools (0.1.22) testing; urgency=low
+
+  * Исправлен мелкий баг с приоритетными узлами.
+
+ -- Лаборатория 50 <team@lab50.net>  Thu, 03 Apr 2014 14:35:54 +0400
+
 cluster-tools (0.1.21) testing; urgency=low
 
   * Выпилены некоторые опции ipmitool.
