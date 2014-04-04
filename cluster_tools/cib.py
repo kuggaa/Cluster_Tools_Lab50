@@ -173,7 +173,7 @@ class CIB(object):
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
 
 
-    def get_clone_children(self, clone_id):
+    def get_produced_resources(self, clone_id):
         """ Returns list of ids. """ 
         return self._communicator.get_clone_children(clone_id)
 
@@ -252,7 +252,7 @@ class CIB(object):
             return CIB.RAW_TYPES.get(cloned_primitive_el.get("type"))
 
 
-    def get_primitive_resource_state(self, id):
+    def get_state_of_primitive(self, id):
         state = self._communicator.get_resource_state(id)
         # Check ongoing operations.
         for op_el in self._cib_el.findall(CIB.ALL_RESOURCE_ONGOING_OPS_XPATH % (id)):

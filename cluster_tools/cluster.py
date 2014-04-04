@@ -55,7 +55,7 @@ class PrimitiveResource(BaseResource):
         self.type = resource_type
         self._group = group
 
-        self.state = cib.get_primitive_resource_state(self.id)
+        self.state = cib.get_state_of_primitive(self.id)
         self.nodes_ids = []
         if (const.resource_state.ON == self.state):
             self.nodes_ids = [cib.get_resource_node(self.id)]
@@ -181,52 +181,31 @@ class BaseClone(object):
 
 
 class ClonedPrimitive(BaseClone):
-    def __init__(self, clone_id, type_of_cloned_resource, cib, nodes):
+    def __init__(self,
+                 id,
+                 type_of_produced_primitives,
+                 cib,
+                 nodes,
+                 ids_of_produced_primitives=None):
         self._cib = cib
-        self.id = clone_id
-        self.type = const.resource_type.CLONE
-        self.type_of_cloned_resource = type_of_cloned_resource
-
-        children = {}
-        for child_id in cib.get_clone_children(self.id):
-            children[child_id] = build_primitive_resource(child_id,
-                                                          self.type_of_cloned_resource,
-                                                          cib)
-        self.state = self._get_state(children)
-
-        self.nodes_ids = []
-        for child in children.values():
-            for node_id in child.nodes_ids:
-                if (node_id not in self.nodes_ids):
-                    self.nodes_ids.append(node_id)
-
-        self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
-
-
-    def _get_state(self, children):
-        for state in STATES_PRIORITY:
-            for child in children.values():
-                if (state == child.state):
-                    return state
-        return const.resource_state.OFF
-
-
-class ChildOfClonedGroup(object):
-    def __init__(self, id, cib, nodes, indexes_of_cloned_groups):
         self.id = id
-        self.type = cib.get_resource_type(self.id)
+        self.type = const.resource_type.CLONE
+        self.type_of_cloned_resource = type_of_produced_primitives
+        if (ids_of_produced_primitives is None):
+            ids_of_produced_primitives = cib.get_produced_resources(id)
+        self._ids_of_produced_primitives = ids_of_produced_primitives
 
+        # Calculate `self.state`.
         states = {}
-        for ind in indexes_of_cloned_groups:
-            cloned_child_id = self.id + ":" + ind
-            state = cib.get_primitive_resource_state(cloned_child_id)
-            states[cloned_child_id] = state
+        for produced_primitive_id in self._ids_of_produced_primitives:
+            states[produced_primitive_id] = cib.get_state_of_primitive(produced_primitive_id)
         self.state = self._get_state(states)
 
+        # Build `self.nodes_ids` and `self.failed_nodes_ids`.
         self.nodes_ids = []
-        for cloned_child_id, state in states.iteritems():
+        for produced_primitive_id, state in states.iteritems():
             if (const.resource_state.ON == state):
-                self.nodes_ids.append(cib.get_resource_node(cloned_child_id))
+                self.nodes_ids.append(cib.get_resource_node(produced_primitive_id))
         self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
 
 
@@ -238,26 +217,34 @@ class ChildOfClonedGroup(object):
         return const.resource_state.OFF
 
 
+    def cleanup(self):
+        for produced_primitive_id in self._ids_of_produced_primitives:
+            self._cib.cleanup(produced_primitive_id)
+
+
 class ClonedGroup(BaseClone):
-    def __init__(self, clone_id, cib, nodes):
+    def __init__(self, id, cib, nodes):
         self._cib = cib
-        self.id = clone_id
+        self.id = id
         self.type = const.resource_type.CLONE
         self.type_of_cloned_resource = const.resource_type.GROUP
 
-        indexes_of_cloned_groups = []
-        for cloned_group_id in cib.get_clone_children(self.id):
-            id, index = cloned_group_id.split(":")
-            indexes_of_cloned_groups.append(index)
+        indexes = []
+        for produced_group_id in cib.get_produced_resources(self.id):
+            id, index = produced_group_id.split(":")
+            indexes.append(index)
 
+        # Build list of children and calculate state.
         self.children = []
-        for id in cib.get_children_of_cloned_group(self.id):
-            self.children.append(ChildOfClonedGroup(id,
-                                                    cib,
-                                                    nodes,
-                                                    indexes_of_cloned_groups))
-
+        for child_id in cib.get_children_of_cloned_group(self.id):
+            resource_type = cib.get_resource_type(child_id)
+            self.children.append(ClonedPrimitive(id,
+                                                 resource_type,
+                                                 cib,
+                                                 nodes,
+                                                 [child_id + ":" + i for i in indexes]))
         self.state = self._get_state()
+        self.nodes_ids = []
 
 
     def _get_state(self):
@@ -266,6 +253,11 @@ class ClonedGroup(BaseClone):
                 if (state == child.state):
                     return state
         return const.resource_state.OFF
+
+
+    def cleanup(self):
+        for child in self.children:
+            child.cleanup()
 
 
 def build_primitive_resource(resource_id, resource_type, cib, group=None):
@@ -304,11 +296,11 @@ class Cluster(object):
         elif (const.resource_type.GROUP == resource_type):
             return Group(id, cib)
         elif (const.resource_type.CLONE == resource_type):
-            type_of_cloned_resource = cib.get_clone_type(id)
-            if (const.resource_type.GROUP == type_of_cloned_resource):
+            type_of_produced_resources = cib.get_clone_type(id)
+            if (const.resource_type.GROUP == type_of_produced_resources):
                 return ClonedGroup(id, cib, nodes)
             else:
-                return ClonedPrimitive(id, type_of_cloned_resource, cib, nodes)
+                return ClonedPrimitive(id, type_of_produced_resources, cib, nodes)
         else:
             group_id = cib.get_group_by_primitive(id)
             if (group_id is None):
@@ -317,7 +309,6 @@ class Cluster(object):
                 if (self._groups.get(group_id) is None):
                     self._groups[group_id] = Group(group_id, cib)
                 return self._groups[group_id].get_resource(id)
-
 
 
     def get_resources(self):
