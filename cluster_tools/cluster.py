@@ -141,9 +141,8 @@ class Group(BaseResource):
         return const.resource_state.OFF
 
 
-    def get_resources(self):
-        for resource in self._resources.values():
-            yield resource
+    def get_children(self):
+        return self._resources.values()
 
     def get_resource(self, resource_id):
         return self._resources.get(resource_id, None)
@@ -254,6 +253,8 @@ class ClonedGroup(BaseClone):
                     return state
         return const.resource_state.OFF
 
+    def get_children(self):
+        return self.children
 
     def cleanup(self):
         for child in self.children:
