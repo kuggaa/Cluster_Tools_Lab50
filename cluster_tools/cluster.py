@@ -94,8 +94,8 @@ class VM(PrimitiveResource):
 
 
     def get_vnc_id(self):
-        if (1 != len(self.nodes_ids)):
-            raise "OLOLO"
+        if (0 == len(self.nodes_ids)):
+            return None
         p = subprocess.Popen(args=["virsh",
                                    "-c",
                                    "qemu+tcp://%s/system" % (self.nodes_ids[0]),
