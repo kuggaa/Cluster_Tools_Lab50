@@ -30,7 +30,8 @@ class BaseResource(object):
             self._cib.unmanage(self.id)
 
     def migrate(self, node):
-        self._cib.migrate_resource(self.id, node.id)
+        if (0 == len(self.get_loc_constraints())):
+            self._cib.migrate_resource(self.id, node.id)
 
     def get_loc_constraints(self):
         return self._cib.get_loc_constraints(self.id)

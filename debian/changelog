@@ -1,3 +1,9 @@
+cluster-tools (0.1.25) testing; urgency=low
+
+  * Мелкий баг с миграцией.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 11 Apr 2014 18:35:38 +0400
+
 cluster-tools (0.1.24) testing; urgency=low
 
   * Мелкий фикс для совместимости с Витей.

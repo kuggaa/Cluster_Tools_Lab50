@@ -15,6 +15,7 @@ class Communicator(object):
     SUCCESS = "o"
     MGMT_PROTOCOL_VER = "2.1"
     LOGIN_CMD = "login\n%s\n%s\n%s"
+    LOGOUT_CMD = "logout"
     STANDBY_MODE_CMD = "crm_attribute\nnodes\nset\nstandby\n%s\n%s\n\n"
 
 
@@ -52,6 +53,7 @@ class Communicator(object):
     def disconnect(self):
         if (not self._connected):
             return
+        #self._communicate(Communicator.LOGOUT_CMD)
         self._sock.close()
         self._connected = False
 
