@@ -238,7 +238,7 @@ class ClonedGroup(BaseClone):
         self.children = []
         for child_id in cib.get_children_of_cloned_group(self.id):
             resource_type = cib.get_resource_type(child_id)
-            self.children.append(ClonedPrimitive(id,
+            self.children.append(ClonedPrimitive(child_id,
                                                  resource_type,
                                                  cib,
                                                  nodes,

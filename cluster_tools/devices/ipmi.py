@@ -3,14 +3,12 @@ IPMI device.
 Just a wrap for ipmitool.
 """
 
-from ..exceptions import DeviceError
-import os
-import subprocess
+from ..exceptions import DeviceError, ProcessError
+from .. import process
 
 
 class IPMI(object):
     CMD = "ipmitool -H %s -I lanplus -U %s -P %s chassis power %s"
-    SUCCESS_CODE = 0
 
     class action:
         ON = "on"
@@ -28,11 +26,10 @@ class IPMI(object):
 
     def _perform_cmd(self, action):
         cmd_str = IPMI.CMD % (self._ip, self._login, self._password, action)
-        devnull = open(os.devnull, "w")
-        result = subprocess.call(cmd_str.split(" "), stdout=devnull, stderr=devnull)
-        devnull.close()
-        if (IPMI.SUCCESS_CODE != result):
-            raise DeviceError(self.id)
+        try:
+            process.call(cmd_str.split(" "))
+        except ProcessError as e:
+            raise DeviceError(self.id, e.err_output)
 
 
     def on(self):

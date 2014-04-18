@@ -1,3 +1,9 @@
+cluster-tools (0.1.26) testing; urgency=low
+
+  * Баг в ConnedGroup.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 18 Apr 2014 15:08:01 +0400
+
 cluster-tools (0.1.25) testing; urgency=low
 
   * Мелкий баг с миграцией.
