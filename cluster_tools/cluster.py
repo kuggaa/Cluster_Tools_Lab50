@@ -18,7 +18,7 @@ class BaseResource(object):
             self._cib.start(self.id)
 
     def stop(self):
-        if (const.resource_state.OFF != self.state):
+        if (self.state not in [const.resource_state.OFF, const.resource_state.UNMANAGED]):
             self._cib.stop(self.id)
 
     def manage(self):
@@ -29,18 +29,16 @@ class BaseResource(object):
         if (const.resource_state.UNMANAGED != self.state):
             self._cib.unmanage(self.id)
 
-    def migrate(self, node):
-        if (0 == len(self.get_loc_constraints())):
-            self._cib.migrate_resource(self.id, node.id)
+    #def migrate(self, node):
+    #    if (0 == len(self.get_loc_constraints())):
+    #        self._cib.migrate_resource(self.id, node.id)
 
     def get_loc_constraints(self):
         return self._cib.get_loc_constraints(self.id)
 
-    def create_loc_constraint(self, node):
-        self._cib.create_loc_constraint(self.id, node.id)
-
     def remove_loc_constraints(self):
-        self._cib.remove_loc_constraints_by_resource(self.id)
+        if (const.resource_state.UNMANAGED != self.state):
+            self._cib.remove_loc_constraints_by_resource(self.id)
 
     def is_group(self):
         return (const.resource_type.GROUP == self.type)
@@ -69,7 +67,8 @@ class PrimitiveResource(BaseResource):
 
     def create_loc_constraint(self, node):
         if (self._group is None) or (0 == len(self._group.get_loc_constraints())):
-            self._cib.create_loc_constraint(self.id, node.id)
+            if (const.resource_state.UNMANAGED != self.state):
+                self._cib.create_loc_constraint(self.id, node.id)
 
     def cleanup(self):
         self._cib.cleanup(self.id)
@@ -164,9 +163,10 @@ class Group(BaseResource):
             resource.set_running_state(resource_is_running)
 
     def create_loc_constraint(self, node):
-        for child in self._resources.values():
-            child.remove_loc_constraints()
-        self._cib.create_loc_constraint(self.id, node.id)
+        if (const.resource_state.UNMANAGED != self.state):
+            for child in self._resources.values():
+                child.remove_loc_constraints()
+            self._cib.create_loc_constraint(self.id, node.id)
 
     def cleanup(self):
         for child in self._resources.values():
