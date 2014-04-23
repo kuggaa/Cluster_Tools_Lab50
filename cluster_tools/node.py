@@ -13,10 +13,9 @@ class Node(object):
 
         self.state = cib.get_node_state(id)
         if (const.node_state.OFF == self.state):
-            self.ip = None
+            self.ip_addrs = []
         else:
-            # TODO: hmmmmmmmmmmmmmmmmmmmmmm...
-            self.ip = socket.gethostbyname(self.id)
+            self.ip_addrs = socket.gethostbyname_ex(self.id)[2]
 
 
     def _on_with_ipmi(self):

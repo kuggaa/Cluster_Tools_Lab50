@@ -1,3 +1,9 @@
+cluster-tools (0.1.28) testing; urgency=low
+
+  * Много ip-адресов для узла вместо одного.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 23 Apr 2014 19:03:27 +0400
+
 cluster-tools (0.1.27) testing; urgency=low
 
   * Больше проверок.
