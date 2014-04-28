@@ -155,6 +155,10 @@ class CIB(object):
             return const.node_state.STANDBY
         return const.node_state.ON
 
+    def is_unclean(self, id):
+        node_el = self._state_el.find("./nodes/node[@id='%s']" % (id))
+        return ("true" == node_el.get("unclean"))
+
 
     def enable_standby_mode(self, node_id):
         self._communicator.enable_standby_mode(node_id)
@@ -164,7 +168,7 @@ class CIB(object):
 
     # Returns list of names.
     def get_root_resources_ids(self):
-        groups_els = self._resources_el.findall(CIB.GROUP_TAG) 
+        groups_els = self._resources_el.findall(CIB.GROUP_TAG)
         primitives_els = self._resources_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)
         clones_els = self._resources_el.findall(CIB.CLONE_TAG)
         return [el.get("id") for el in primitives_els + groups_els + clones_els]
@@ -189,7 +193,11 @@ class CIB(object):
 
     def get_produced_resources(self, clone_id):
         """ Returns list of ids. """
-        return self._communicator.get_clone_children(clone_id)
+        clone_el = self._state_el.find("./resources/clone[@id='%s']" % (clone_id))
+        ids = []
+        for produced_resource_el in clone_el:
+            ids.append(produced_resource_el.get("id"))
+        return ids
 
 
     def create_vm(self, id, conf_file_path):

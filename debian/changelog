@@ -1,3 +1,9 @@
+cluster-tools (0.1.30) testing; urgency=low
+
+  * Теперь помечаем unclean-узлы.
+
+ -- Лаборатория 50 <team@lab50.net>  Mon, 28 Apr 2014 18:46:52 +0400
+
 cluster-tools (0.1.29) testing; urgency=low
 
   * crm_mon вместо pacemaker-mgmt.

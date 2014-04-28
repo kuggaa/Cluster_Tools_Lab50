@@ -12,6 +12,7 @@ class Node(object):
         self._devices_rep = devices_rep
 
         self.state = cib.get_state_of_node(id)
+        self.is_unclean = cib.is_unclean(id)
         if (const.node_state.OFF == self.state):
             self.ip_addrs = []
         else:

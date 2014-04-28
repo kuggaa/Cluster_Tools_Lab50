@@ -48,7 +48,7 @@ class BaseResource(object):
         return (const.resource_type.CLONE == self.type)
 
 
-class PrimitiveResource(BaseResource):
+class Primitive(BaseResource):
     def __init__(self, id, resource_type, cib, group=None):
         self._cib = cib
         self.id = id
@@ -89,9 +89,9 @@ class PrimitiveResource(BaseResource):
         return "Resource " + self.id
 
 
-class VM(PrimitiveResource):
+class VM(Primitive):
     def __init__(self, resource_id, cib, group=None):
-        PrimitiveResource.__init__(self, resource_id, const.resource_type.VM, cib, group)
+        Primitive.__init__(self, resource_id, const.resource_type.VM, cib, group)
 
 
     def get_vnc_id(self):
@@ -267,7 +267,7 @@ def build_primitive_resource(resource_id, resource_type, cib, group=None):
     if (const.resource_type.VM == resource_type):
         return VM(resource_id, cib, group)
     else:
-        return PrimitiveResource(resource_id, resource_type, cib, group)
+        return Primitive(resource_id, resource_type, cib, group)
 
 
 class Cluster(object):
