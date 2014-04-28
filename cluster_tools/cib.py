@@ -1,6 +1,8 @@
 import const
 from communicator import Communicator
+import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import SubElement as SubEl
+import process
 
 
 # Cluster Information Base.
@@ -46,8 +48,13 @@ class CIB(object):
                  "nscd": const.resource_type.NAME_SERVICE_CACHE_DAEMON,
                  "slapd": const.resource_type.OPENLDAP_SERVER}
 
-                 
-  
+
+    @staticmethod
+    def get_real_time_state():
+        xml_str = process.call(["crm_mon", "--as-xml", "--one-shot", "--inactive"])
+        return ET.fromstring(xml_str)
+
+
     @staticmethod
     def _create_attrs_el(resource_el, tag, attrs):
         id = resource_el.get("id") + "-" + tag
@@ -133,13 +140,20 @@ class CIB(object):
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)
 
+        self._state_el = CIB.get_real_time_state()
+
 
     def get_nodes_ids(self):
         return [el.get("id") for el in self._nodes_el.findall(CIB.NODE_TAG)]
 
 
-    def get_node_state(self, node_id):
-        return self._communicator.get_node_state(node_id)
+    def get_state_of_node(self, id):
+        node_el = self._state_el.find("./nodes/node[@id='%s']" % (id))
+        if ("false" == node_el.get("online")):
+            return const.node_state.OFF
+        if ("true" == node_el.get("standby")):
+            return const.node_state.STANDBY
+        return const.node_state.ON
 
 
     def enable_standby_mode(self, node_id):
@@ -157,7 +171,7 @@ class CIB(object):
 
 
     def get_group_children(self, group_id):
-        """ Returns list of ids. """ 
+        """ Returns list of ids. """
         group_el = self._get_group_el(group_id)
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
 
@@ -167,14 +181,14 @@ class CIB(object):
         return None if (group_el is None) else group_el.get("id")
 
     def get_children_of_cloned_group(self, clone_id):
-        """ Returns list of ids. """ 
+        """ Returns list of ids. """
         clone_el = self._get_clone_el(clone_id)
         group_el = clone_el.find(CIB.GROUP_TAG)
         return [el.get("id") for el in group_el.findall(CIB.PRIMITIVE_RESOURCE_TAG)]
 
 
     def get_produced_resources(self, clone_id):
-        """ Returns list of ids. """ 
+        """ Returns list of ids. """
         return self._communicator.get_clone_children(clone_id)
 
 
@@ -253,21 +267,25 @@ class CIB(object):
 
 
     def get_state_of_primitive(self, id):
-        state = self._communicator.get_resource_state(id)
-        # Check ongoing operations.
-        for op_el in self._cib_el.findall(CIB.ALL_RESOURCE_ONGOING_OPS_XPATH % (id)):
-            if ("start" == op_el.get("operation")):
-                state = const.resource_state.STARTING
-                break
-            elif ("stop" == op_el.get("operation")):
-                state = const.resource_state.STOPPING
-                break
-        return state
+        primitive_el = self._state_el.find("./resources//resource[@id='%s']" % (id))
+        if ("false" == primitive_el.get("managed")):
+            return const.resource_state.UNMANAGED
+        if ("false" == primitive_el.get("active")):
+            return const.resource_state.OFF
+        if ("true" == primitive_el.get("failed")):
+            return const.resource_state.FAILED
+        return const.resource_state.ON
 
 
-    # Do not use for groups.
-    def get_resource_node(self, resource_id):
-        return self._communicator.get_resource_node(resource_id)
+    def get_location_of_primitive(self, id):
+        """
+        Do not use for groups.
+        """
+        node_el = self._state_el.find("./resources//resource[@id='%s']/node" % (id))
+        if (node_el is not None):
+            return node_el.get("id")
+        else:
+            return None
 
 
     def _modify_target_role(self, id, target_role):

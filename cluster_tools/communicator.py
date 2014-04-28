@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import socket
 import ssl
 
+
 server_addr = "astra-cluster-1"
 password = "user"
 
@@ -91,21 +92,6 @@ class Communicator(object):
         return ET.fromstring("".join(response))
 
 
-    def get_node_state(self, node_id):
-        ONLINE_ATTR_IND = 1
-        STANDBY_ATTR_IND = 2
-        response = self._perform_cmd("node_config\n%s" % (node_id))
-        online = ("True" == response[ONLINE_ATTR_IND])
-        standby = ("True" == response[STANDBY_ATTR_IND])
-
-        if (not online):
-            return const.node_state.OFF
-        elif (standby):
-            return const.node_state.STANDBY
-        else:
-            return const.node_state.ON
-
-
     def enable_standby_mode(self, node_id):
         self._perform_cmd(Communicator.STANDBY_MODE_CMD % ("on", node_id))
 
@@ -115,27 +101,6 @@ class Communicator(object):
 
     def get_clone_children(self, clone_id):
         return self._perform_cmd("sub_rsc\n" + clone_id)
-
-
-    def get_resource_node(self, resource_id):
-        result = self._perform_cmd("rsc_running_on\n" + resource_id)
-        return result[0] if (len(result) >= 1) else None
-
-
-    def get_resource_state(self, resource_id):
-        state = self._perform_cmd("rsc_status\n" + resource_id)[0]
-        if ("unmanaged" in state) or ("unclean" in state) or ("failure ignored" in state):
-            return const.resource_state.UNMANAGED
-        elif ("failed" in state):
-            return const.resource_state.FAILED
-        elif ("stopping" in state):
-            return const.resource_state.STOPPING
-        elif ("not running" in state) or ("Stopped" in state):
-            return const.resource_state.OFF
-        elif ("running" in state):
-            return const.resource_state.ON
-        else:
-            assert(False), "Unknown state: %s." % (state)
 
 
     def modify_attr(self, resource_id, attr, val):

@@ -3,6 +3,7 @@ from cib import CIB
 from node import Node
 
 import subprocess
+from cluster_tools import process
 
 
 STATES_PRIORITY = [const.resource_state.ON,
@@ -57,7 +58,7 @@ class PrimitiveResource(BaseResource):
         self.state = cib.get_state_of_primitive(self.id)
         self.nodes_ids = []
         if (const.resource_state.ON == self.state):
-            self.nodes_ids = [cib.get_resource_node(self.id)]
+            self.nodes_ids = [cib.get_location_of_primitive(self.id)]
 
     def get_raw_type(self):
         for raw_type, type in CIB.RAW_TYPES.iteritems():
@@ -205,7 +206,7 @@ class ClonedPrimitive(BaseClone):
         self.nodes_ids = []
         for produced_primitive_id, state in states.iteritems():
             if (const.resource_state.ON == state):
-                self.nodes_ids.append(cib.get_resource_node(produced_primitive_id))
+                self.nodes_ids.append(cib.get_location_of_primitive(produced_primitive_id))
         self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
 
 
@@ -278,9 +279,8 @@ class Cluster(object):
         for node_id in self._cib.get_nodes_ids():
             nodes[node_id] = Node(node_id, self._cib, devices_rep)
         self._nodes = nodes
-
         self._groups = {}
-
+        
 
     def get_nodes(self):
         for node in self._nodes.values():
