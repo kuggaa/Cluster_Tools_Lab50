@@ -1,3 +1,9 @@
+cluster-tools (0.1.31) testing; urgency=low
+
+  * Стадии создания ВМ.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 30 Apr 2014 17:59:44 +0400
+
 cluster-tools (0.1.30) testing; urgency=low
 
   * Теперь помечаем unclean-узлы.

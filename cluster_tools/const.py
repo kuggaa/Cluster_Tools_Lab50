@@ -78,6 +78,13 @@ class resource_state(object):
             assert(False and "bad state")
 
 
+class stage_of_vm_creation(object):
+    CREATE_REMOTE_ISO = 0
+    COPY_REMOTE_ISO = 1
+    CREATE_IMG = 2
+    CREATE_RESOURCE = 3
+
+
 class action(object):
     SEE_NODES = "can_see_nodes"
     CONTROL_NODES = "can_control_nodes"
