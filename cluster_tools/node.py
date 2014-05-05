@@ -103,6 +103,20 @@ class Node(object):
             self._cib.cancel_standby_mode(self.id)
 
 
+    def is_rdp_available(self, port=3389, timeout=0.5):
+        if (0 == len(self.ip_addrs)):
+            return False
+
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(timeout)
+            sock.connect((self.ip_addrs[0], port))
+            sock.close()
+        except socket.error:
+            return False
+        return True
+
+
     def __str__(self):
         return "[%s] %s" % (const.node_state.to_str(self.state), self.id)
     def __repr__(self):

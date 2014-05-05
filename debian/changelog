@@ -1,3 +1,9 @@
+cluster-tools (0.1.32) testing; urgency=low
+
+  * Проверка работоспособности RDP-сервера.
+
+ -- Лаборатория 50 <team@lab50.net>  Mon, 05 May 2014 17:08:12 +0400
+
 cluster-tools (0.1.31) testing; urgency=low
 
   * Стадии создания ВМ.
