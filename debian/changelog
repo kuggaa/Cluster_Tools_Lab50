@@ -1,3 +1,9 @@
+cluster-tools (0.1.33) testing; urgency=low
+
+  * Временное решения для crm_mon.
+
+ -- Лаборатория 50 <team@lab50.net>  Thu, 15 May 2014 15:40:59 +0400
+
 cluster-tools (0.1.32) testing; urgency=low
 
   * Проверка работоспособности RDP-сервера.

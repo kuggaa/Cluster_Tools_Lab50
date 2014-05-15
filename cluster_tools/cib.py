@@ -49,9 +49,10 @@ class CIB(object):
                  "slapd": const.resource_type.OPENLDAP_SERVER}
 
 
+    # TODO: get rid of cmd.
     @staticmethod
     def get_real_time_state():
-        xml_str = process.call(["crm_mon", "--as-xml", "--one-shot", "--inactive"])
+        xml_str = process.call(["sudo", "crm_mon", "--as-xml", "--one-shot", "--inactive"])
         return ET.fromstring(xml_str)
 
 
