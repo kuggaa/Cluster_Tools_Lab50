@@ -1,3 +1,9 @@
+cluster-tools (0.1.35) testing; urgency=medium
+
+  * Не показываем узлы для клона не под управлением.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 23 May 2014 18:48:57 +0400
+
 cluster-tools (0.1.34) testing; urgency=medium
 
   * Учитывем запрещеющие ограничения на узлы.

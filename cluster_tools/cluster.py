@@ -204,10 +204,12 @@ class ClonedPrimitive(BaseClone):
 
         # Build `self.nodes_ids` and `self.failed_nodes_ids`.
         self.nodes_ids = []
-        for produced_primitive_id, state in states.iteritems():
-            if (const.resource_state.ON == state):
-                self.nodes_ids.append(cib.get_location_of_primitive(produced_primitive_id))
-        self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
+        self.failed_nodes_ids = []
+        if (const.resource_state.UNMANAGED != self.state):
+            for produced_primitive_id, state in states.iteritems():
+                if (const.resource_state.ON == state):
+                    self.nodes_ids.append(cib.get_location_of_primitive(produced_primitive_id))
+            self.failed_nodes_ids = [n.id for n in nodes.values() if (n.id not in self.nodes_ids)]
 
 
     def _get_state(self, states):
