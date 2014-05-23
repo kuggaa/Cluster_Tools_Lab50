@@ -5,6 +5,15 @@ from xml.etree.ElementTree import SubElement as SubEl
 import process
 
 
+class LocConstarint(object):
+    def __init__(self, node_id, score):
+        self.node_id = node_id
+        self.score = score
+
+    def isTabu(self):
+        return ("-" == self.score[0])
+
+
 # Cluster Information Base.
 class CIB(object):
     VM_TMPL_ID = "vm_template"
@@ -320,19 +329,27 @@ class CIB(object):
     def migrate_resource(self, resource_id, node_id):
         self._communicator.migrate_resource(resource_id, node_id)
 
+
     def get_loc_constraints(self, id):
-        """ Returns nodes ids. """
-        nodes_ids = []
+        """ Returns list of LocConstarint instances. """
+        loc_constraints = []
         for constr_el in self._get_loc_contraints_els_by_resource(id):
             node_id = constr_el.get("node")
             if (node_id is None):
-                expr_el = constr_el.find("./rule/expression")
-                if (expr_el is None) or (expr_el.get("value") is None):
+                rule_el = constr_el.find("./rule")
+                if (rule_el is None):
                     continue
-                nodes_ids.append(expr_el.get("value"))
+                expr_el = rule_el.find("./expression")
+                if (expr_el is None):
+                    continue
+
+                node_id = expr_el.get("node")
+                score = rule_el.get("score")
+                loc_constraints.append(LocConstarint(node_id, score))
             else:
-                nodes_ids.append(node_id)
-        return nodes_ids
+                score = constr_el.get("score")
+                loc_constraints.append(LocConstarint(node_id, score))
+        return loc_constraints
 
 
     def create_loc_constraint(self, resource_id, node_id):
