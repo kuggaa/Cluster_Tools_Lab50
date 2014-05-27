@@ -1,3 +1,9 @@
+cluster-tools (0.1.36) testing; urgency=medium
+
+  * Исправлен баг с отображением приоритеного узла.
+
+ -- Лаборатория 50 <team@lab50.net>  Tue, 27 May 2014 11:08:25 +0400
+
 cluster-tools (0.1.35) testing; urgency=medium
 
   * Не показываем узлы для клона не под управлением.

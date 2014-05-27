@@ -343,7 +343,7 @@ class CIB(object):
                 if (expr_el is None):
                     continue
 
-                node_id = expr_el.get("node")
+                node_id = expr_el.get("value")
                 score = rule_el.get("score")
                 loc_constraints.append(LocConstarint(node_id, score))
             else:
