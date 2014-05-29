@@ -275,14 +275,9 @@ def build_primitive_resource(resource_id, resource_type, cib, group=None):
 class Cluster(object):
     def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
-        self._cib.update()
+        self._devices_rep = devices_rep
+        self.update()
 
-        nodes = {}
-        for node_id in self._cib.get_nodes_ids():
-            nodes[node_id] = Node(node_id, self._cib, devices_rep)
-        self._nodes = nodes
-        self._groups = {}
-        
 
     def get_nodes(self):
         for node in self._nodes.values():
@@ -325,9 +320,25 @@ class Cluster(object):
     def get_resource(self, id):
         return self._build_resource(id, self._cib, self._nodes)
 
+    def get_primitives(self, primitive_type):
+        primitives = []
+        for res in self.get_resources():
+            if (res.type == primitive_type):
+                primitives.append(res)
+            elif (res.is_group()):
+                for child_res in res.get_children():
+                    if (child_res.type == primitive_type):
+                        primitives.append(child_res)
+        return primitives
+
 
     def update(self):
-        pass
+        self._cib.update()
+        nodes = {}
+        for node_id in self._cib.get_nodes_ids():
+            nodes[node_id] = Node(node_id, self._cib, self._devices_rep)
+        self._nodes = nodes
+        self._groups = {}
 
 
     def create_vm(self, id, conf_file_path):
