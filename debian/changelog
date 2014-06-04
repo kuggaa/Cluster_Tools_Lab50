@@ -1,3 +1,9 @@
+cluster-tools (0.1.38) testing; urgency=medium
+
+  * Увеличен таймаут.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 04 Jun 2014 15:40:11 +0400
+
 cluster-tools (0.1.37) testing; urgency=medium
 
   * Отключение кластера.
