@@ -1,3 +1,9 @@
+cluster-tools (0.1.39) testing; urgency=medium
+
+  * Остановка всего кластера - только через IPMI.
+
+ -- Лаборатория 50 <team@lab50.net>  Thu, 05 Jun 2014 12:33:20 +0400
+
 cluster-tools (0.1.38) testing; urgency=medium
 
   * Увеличен таймаут.

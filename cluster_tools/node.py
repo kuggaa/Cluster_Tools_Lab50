@@ -19,7 +19,7 @@ class Node(object):
             self.ip_addrs = socket.gethostbyname_ex(self.id)[2]
 
 
-    def _on_with_ipmi(self):
+    def on_with_ipmi(self):
         """ Returns False in case of fail."""
         ipmi = self._devices_rep.get_ipmi_for_node(self.id)
         if (ipmi is None):
@@ -32,7 +32,7 @@ class Node(object):
             return False
 
 
-    def _on_with_pdu(self):
+    def on_with_pdu(self):
         """ Returns False in case of fail. """
         # Off.
         for pdu in self._devices_rep.pdu_devices.values():
@@ -56,12 +56,13 @@ class Node(object):
 
 
     def on(self):
+        """ Throws DeviceError in case of fail. """
         if (const.node_state.OFF == self.state):
-            if not (self._on_with_ipmi() or self._on_with_pdu()):
+            if not (self.on_with_ipmi() or self.on_with_pdu()):
                 raise DeviceError()
 
 
-    def _off_with_ipmi(self):
+    def off_with_ipmi(self):
         """ Returns False in case of fail. """
         ipmi = self._devices_rep.get_ipmi_for_node(self.id)
         if (ipmi is None):
@@ -75,8 +76,8 @@ class Node(object):
             return False
 
 
-    # Returns False in case of fail.
-    def _off_with_pdu(self):
+    def off_with_pdu(self):
+        """ Returns False in case of fail. """
         ok = False
         for pdu in self._devices_rep.pdu_devices.values():
             if (pdu.is_connected(self.id)):
@@ -89,8 +90,9 @@ class Node(object):
 
 
     def off(self):
+        """ Throws DeviceError in case of fail. """
         if (const.node_state.OFF != self.state):
-            if not (self._off_with_ipmi() or self._off_with_pdu()):
+            if not (self.off_with_ipmi() or self.off_with_pdu()):
                 raise DeviceError()
 
 
