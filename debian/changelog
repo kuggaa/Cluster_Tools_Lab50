@@ -1,3 +1,9 @@
+cluster-tools (0.1.41) testing; urgency=medium
+
+  * Таймаут увеличен до 60 сек.
+
+ -- Лаборатория 50 <team@lab50.net>  Thu, 03 Jul 2014 12:55:12 +0400
+
 cluster-tools (0.1.40) testing; urgency=medium
 
   * Таймаут увеличен до 30 сек.
