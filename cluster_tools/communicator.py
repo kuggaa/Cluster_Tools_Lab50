@@ -32,7 +32,7 @@ class Communicator(object):
         return self._connected
 
 
-    def connect(self, host=server_addr, login="user", password=password, port=5560, timeout=15.0):
+    def connect(self, host=server_addr, login="user", password=password, port=5560, timeout=30.0):
         assert(not self._connected)
         self._sock = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM),
                                      ssl_version=ssl.PROTOCOL_TLSv1,
