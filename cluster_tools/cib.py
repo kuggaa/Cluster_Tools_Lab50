@@ -142,6 +142,7 @@ class CIB(object):
         self._nodes_el = None
         self._resources_el = None
         self._constraints_el = None
+        self._state_el = None
 
 
     def update(self):
@@ -149,7 +150,6 @@ class CIB(object):
         self._nodes_el = self._cib_el.find(CIB.NODES_XPATH)
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)
-
         self._state_el = CIB.get_real_time_state()
 
 
@@ -408,6 +408,12 @@ class CIB(object):
 
         self._resources_el.append(resource_el)
         self._communicator.modify(self._resources_el)
+
+
+    def is_fails_overflow(self, resource_id, node_id):
+        XPATH = "./status/node_state[@id='%s']/transient_attributes/instance_attributes/nvpair[@name='fail-count-%s']"
+        attr_el = self._cib_el.find(XPATH % (node_id, resource_id))
+        return False if (attr_el is None) else ("INFINITY" == attr_el.get("value"))
 
 
     def remove_primitive_resource(self, id):

@@ -45,7 +45,7 @@ class BaseResource(object):
         return (const.resource_type.GROUP == self.type)
 
     def is_clone(self):
-        return (const.resource_type.CLONE == self.type)
+        return False
 
 
 class Primitive(BaseResource):
@@ -79,6 +79,9 @@ class Primitive(BaseResource):
 
     def move_to_root(self):
         self._cib.move_to_root(self.id)
+
+    def is_fails_overflow(self, node):
+        return self._cib.is_fails_overflow(self.id, node.id)
 
     def remove(self):
         self._cib.remove_primitive_resource(self.id)
@@ -173,6 +176,12 @@ class Group(BaseResource):
         for child in self._resources.values():
             child.cleanup()
 
+    def is_fails_overflow(self, node):
+        for resource in self._resources.values():
+            if (resource.is_fails_overflow(node)):
+                return True
+        return False
+
 
 class BaseClone(object):
     def is_group(self):
@@ -224,6 +233,12 @@ class ClonedPrimitive(BaseClone):
         for produced_primitive_id in self._ids_of_produced_primitives:
             self._cib.cleanup(produced_primitive_id)
 
+    def is_fails_overflow(self, node):
+        for produced_primitive_id in self._ids_of_produced_primitives:
+            if (self._cib.is_fails_overflow(produced_primitive_id, node.id)):
+                return True
+        return False
+
 
 class ClonedGroup(BaseClone):
     def __init__(self, id, cib, nodes):
@@ -263,6 +278,12 @@ class ClonedGroup(BaseClone):
     def cleanup(self):
         for child in self.children:
             child.cleanup()
+
+    def is_fails_overflow(self, node):
+        for child in self.children:
+            if (child.is_fails_overflow(node)):
+                return True
+        return False
 
 
 def build_primitive_resource(resource_id, resource_type, cib, group=None):
