@@ -1,3 +1,9 @@
+cluster-tools (0.1.45) testing; urgency=medium
+
+  * Очепятка в ProcessError.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 18 Jul 2014 17:55:16 +0400
+
 cluster-tools (0.1.44) testing; urgency=medium
 
   * Код ошибки для ProcessError.
