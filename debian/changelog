@@ -1,3 +1,9 @@
+cluster-tools (0.1.42) testing; urgency=medium
+
+  * Очистка при помощи команды crm_resource.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 18 Jul 2014 15:26:10 +0400
+
 cluster-tools (0.1.41) testing; urgency=medium
 
   * Таймаут увеличен до 60 сек.

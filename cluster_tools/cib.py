@@ -370,8 +370,11 @@ class CIB(object):
 
 
     def cleanup(self, resource_id):
-        for node_id in self.get_nodes_ids():
-            self._communicator.cleanup(resource_id, node_id)
+        cmd = "sudo crm_resource --resource %s --cleanup" % (resource_id)
+        process.call(cmd.split(" "))
+
+        #for node_id in self.get_nodes_ids():
+        #    self._communicator.cleanup(resource_id, node_id)
 
 
     def set_group(self, resource_id, group_id):
