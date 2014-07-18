@@ -230,8 +230,8 @@ class ClonedPrimitive(BaseClone):
 
 
     def cleanup(self):
-        for produced_primitive_id in self._ids_of_produced_primitives:
-            self._cib.cleanup(produced_primitive_id)
+        self._cib.cleanup(self.id)
+
 
     def is_fails_overflow(self, node):
         for produced_primitive_id in self._ids_of_produced_primitives:
@@ -276,8 +276,7 @@ class ClonedGroup(BaseClone):
         return self.children
 
     def cleanup(self):
-        for child in self.children:
-            child.cleanup()
+        self._cib.cleanup(self.id)
 
     def is_fails_overflow(self, node):
         for child in self.children:

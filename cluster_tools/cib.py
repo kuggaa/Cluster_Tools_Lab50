@@ -61,7 +61,8 @@ class CIB(object):
     # TODO: get rid of cmd.
     @staticmethod
     def get_real_time_state():
-        xml_str = process.call(["sudo", "crm_mon", "--as-xml", "--one-shot", "--inactive"])
+        cmd = "sudo crm_mon --as-xml --one-shot --inactive"
+        xml_str = process.call(cmd.split(" "))
         return ET.fromstring(xml_str)
 
 
@@ -146,11 +147,15 @@ class CIB(object):
 
 
     def update(self):
+        cmd = "sudo cibadmin --query --local"
+        cib_str = process.call(cmd.split(" "))
+        self._cib_el = ET.fromstring(cib_str)
+        self._state_el = CIB.get_real_time_state()
+
         self._cib_el = self._communicator.get_cib()
         self._nodes_el = self._cib_el.find(CIB.NODES_XPATH)
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)
-        self._state_el = CIB.get_real_time_state()
 
 
     def get_nodes_ids(self):
@@ -372,9 +377,6 @@ class CIB(object):
     def cleanup(self, resource_id):
         cmd = "sudo crm_resource --resource %s --cleanup" % (resource_id)
         process.call(cmd.split(" "))
-
-        #for node_id in self.get_nodes_ids():
-        #    self._communicator.cleanup(resource_id, node_id)
 
 
     def set_group(self, resource_id, group_id):

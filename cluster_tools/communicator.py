@@ -87,11 +87,6 @@ class Communicator(object):
                 return response_list[1:]
 
 
-    def get_cib(self):
-        response = self._perform_cmd("cib_query\ncib")
-        return ET.fromstring("".join(response))
-
-
     def enable_standby_mode(self, node_id):
         self._perform_cmd(Communicator.STANDBY_MODE_CMD % ("on", node_id))
 
@@ -117,11 +112,6 @@ class Communicator(object):
 
     def migrate_resource(self, resource_id, node_id):
         cmd = "migrate\n%s\n%s\nfalse\n" % (resource_id, node_id)
-        self._perform_cmd(cmd)
-
-
-    def cleanup(self, resource_id, node_id):
-        cmd = "crm_rsc_cmd\n%s\ncleanup\n%s" % (resource_id, node_id)
         self._perform_cmd(cmd)
 
 

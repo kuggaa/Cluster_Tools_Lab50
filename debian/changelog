@@ -1,3 +1,9 @@
+cluster-tools (0.1.43) testing; urgency=medium
+
+  * Получение CIB при помощи команды cibadmin.
+
+ -- Лаборатория 50 <team@lab50.net>  Fri, 18 Jul 2014 15:55:21 +0400
+
 cluster-tools (0.1.42) testing; urgency=medium
 
   * Очистка при помощи команды crm_resource.
