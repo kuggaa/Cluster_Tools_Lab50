@@ -11,5 +11,4 @@ def call(args):
     if (0 == process.returncode):
         return out
     else:
-        raise ProcessError(args, err)
-        print("virt-install failed!\n#%s\n#%s" % (cmd_str, err))
+        raise ProcessError(args, err, process.returncode)

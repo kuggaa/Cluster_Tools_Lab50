@@ -152,7 +152,6 @@ class CIB(object):
         self._cib_el = ET.fromstring(cib_str)
         self._state_el = CIB.get_real_time_state()
 
-        self._cib_el = self._communicator.get_cib()
         self._nodes_el = self._cib_el.find(CIB.NODES_XPATH)
         self._resources_el = self._cib_el.find(CIB.RESOURCES_XPATH)
         self._constraints_el = self._cib_el.find(CIB.CONSTRAINTS_XPATH)

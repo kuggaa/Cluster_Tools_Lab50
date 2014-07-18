@@ -5,6 +5,7 @@ class DeviceError(Exception):
 
 
 class ProcessError(Exception):
-    def __init__(self, args, err_output):
+    def __init__(self, args, err_output, err_code):
         self.cmd = " ".join(args)
         self.err_output = err_output
+        seld.err_code = err_code
