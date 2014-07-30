@@ -1,3 +1,9 @@
+cluster-tools (0.1.47) testing; urgency=medium
+
+  * Метод CIB.get_raw_type.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 30 Jul 2014 12:38:23 +0400
+
 cluster-tools (0.1.46) testing; urgency=medium
 
   * Класс VM больше не нужен.

@@ -59,6 +59,15 @@ class CIB(object):
                  "xrdp": const.resource_type.RDP_SERVER}
 
 
+    @staticmethod
+    def get_raw_type(required_type):
+        """ Returns None in case of fail. """
+        for raw_type, type in CIB.RAW_TYPES.iteritems():
+            if (type == required_type):
+                return raw_type
+        return None
+
+
     # TODO: get rid of cmd.
     @staticmethod
     def get_real_time_state():

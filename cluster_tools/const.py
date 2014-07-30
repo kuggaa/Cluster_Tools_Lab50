@@ -84,14 +84,3 @@ class stage_of_vm_creation(object):
     COPY_REMOTE_ISO = 1
     CREATE_IMG = 2
     CREATE_RESOURCE = 3
-
-
-class action(object):
-    SEE_NODES = "can_see_nodes"
-    CONTROL_NODES = "can_control_nodes"
-
-    SEE_RESOURCES = "can_see_resources"
-    SEE_RESOURCES_TIMEOUTS = "can_see_resources_timeouts"
-    CREATE_RESOURCE = "can_create_resource"
-    CONTROL_RESOURCES = "can_control_resources"
-    OPEN_VM_CONSOLE = "can_open_vm_console"

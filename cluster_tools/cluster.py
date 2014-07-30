@@ -61,10 +61,7 @@ class Primitive(BaseResource):
             self.nodes_ids = [cib.get_location_of_primitive(self.id)]
 
     def get_raw_type(self):
-        for raw_type, type in CIB.RAW_TYPES.iteritems():
-            if (type == self.type):
-                return raw_type
-        return None
+        return CIB.get_raw_type(self.type)
 
     def create_loc_constraint(self, node):
         if (self._group is None) or (0 == len(self._group.get_loc_constraints())):
