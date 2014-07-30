@@ -35,6 +35,7 @@ class resource_type(object):
     ALD_DAEMON = 17
     NAME_SERVICE_CACHE_DAEMON = 18
     OPENLDAP_SERVER = 19
+    RDP_SERVER = 20
 
 
     @staticmethod

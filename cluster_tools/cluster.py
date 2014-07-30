@@ -92,27 +92,6 @@ class Primitive(BaseResource):
         return "Resource " + self.id
 
 
-class VM(Primitive):
-    def __init__(self, resource_id, cib, group=None):
-        Primitive.__init__(self, resource_id, const.resource_type.VM, cib, group)
-
-
-    def get_vnc_id(self):
-        if (0 == len(self.nodes_ids)):
-            return None
-        p = subprocess.Popen(args=["virsh",
-                                   "-c",
-                                   "qemu+tcp://%s/system" % (self.nodes_ids[0]),
-                                   "vncdisplay",
-                                   self.id],
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        out, err = p.communicate()
-        if (0 != p.returncode):
-            return None
-        return int(out.strip().replace(":", ""))
-
-
 class Group(BaseResource):
     def __init__(self, group_id, cib):
         self._cib = cib
@@ -123,10 +102,10 @@ class Group(BaseResource):
         children_ids = cib.get_group_children(self.id)
         for child_id in children_ids:
             resource_type = cib.get_resource_type(child_id)
-            self._resources[child_id] = build_primitive_resource(child_id,
-                                                                 resource_type,
-                                                                 cib,
-                                                                 self)
+            self._resources[child_id] = Primitive(child_id,
+                                                  resource_type,
+                                                  cib,
+                                                  self)
 
         self.state = self._get_state()
         self.nodes_ids = []
@@ -285,13 +264,6 @@ class ClonedGroup(BaseClone):
         return False
 
 
-def build_primitive_resource(resource_id, resource_type, cib, group=None):
-    if (const.resource_type.VM == resource_type):
-        return VM(resource_id, cib, group)
-    else:
-        return Primitive(resource_id, resource_type, cib, group)
-
-
 class Cluster(object):
     def __init__(self, host, login, password, devices_rep):
         self._cib = CIB(host, login, password)
@@ -323,7 +295,7 @@ class Cluster(object):
         else:
             group_id = cib.get_group_by_primitive(id)
             if (group_id is None):
-                return build_primitive_resource(id, resource_type, cib)
+                return Primitive(id, resource_type, cib)
             else:
                 if (self._groups.get(group_id) is None):
                     self._groups[group_id] = Group(group_id, cib)

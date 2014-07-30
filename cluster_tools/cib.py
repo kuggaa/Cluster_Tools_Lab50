@@ -55,7 +55,8 @@ class CIB(object):
                  "krb5-admin-server": const.resource_type.KERBEROS_MASTER_SERVER,
                  "aldd": const.resource_type.ALD_DAEMON,
                  "nscd": const.resource_type.NAME_SERVICE_CACHE_DAEMON,
-                 "slapd": const.resource_type.OPENLDAP_SERVER}
+                 "slapd": const.resource_type.OPENLDAP_SERVER,
+                 "xrdp": const.resource_type.RDP_SERVER}
 
 
     # TODO: get rid of cmd.

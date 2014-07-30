@@ -1,3 +1,9 @@
+cluster-tools (0.1.46) testing; urgency=medium
+
+  * Класс VM больше не нужен.
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 30 Jul 2014 11:41:56 +0400
+
 cluster-tools (0.1.45) testing; urgency=medium
 
   * Очепятка в ProcessError.
