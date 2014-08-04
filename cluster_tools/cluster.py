@@ -60,9 +60,6 @@ class Primitive(BaseResource):
         if (const.resource_state.ON == self.state):
             self.nodes_ids = [cib.get_location_of_primitive(self.id)]
 
-    def get_raw_type(self):
-        return CIB.get_raw_type(self.type)
-
     def create_loc_constraint(self, node):
         if (self._group is None) or (0 == len(self._group.get_loc_constraints())):
             if (const.resource_state.UNMANAGED != self.state):
@@ -130,11 +127,14 @@ class Group(BaseResource):
     def get_resources_qty(self):
         return len(self._resources)
 
-    def check_vm_childs(self):
-        if len(self._resources) == 0:
+    def contains_vm(self):
+        if (0 == self.get_resources_qty()):
             return False
         else:
-            return self._resources.values()[0].type == const.resource_type.VM
+            for resource in self._resources.values():
+                if (resource.type == const.resource_type.VM):
+                    return True
+            return False
 
     def set_running_state(self, resource_is_running):
         for resource in self._resources.values():
