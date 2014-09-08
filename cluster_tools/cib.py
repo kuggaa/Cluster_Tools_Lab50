@@ -452,4 +452,7 @@ class CIB(object):
                 group_el.remove(resource_el)
 
         # Cleanup! Stupid Pacemaker would not do this itself.
-        self.cleanup(id)
+        try:
+            self.cleanup(id)
+        except:
+            pass
