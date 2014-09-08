@@ -450,3 +450,6 @@ class CIB(object):
             else:
                 self._communicator.remove_resource(resource_el)
                 group_el.remove(resource_el)
+
+        # Cleanup! Stupid Pacemaker would not do this itself.
+        self.cleanup(id)
