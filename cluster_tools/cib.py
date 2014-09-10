@@ -147,13 +147,23 @@ class CIB(object):
 
 
     def __init__(self, host, login, password):
-        self._communicator = Communicator()
-        self._communicator.connect(host, login, password)
         self._cib_el = None
         self._nodes_el = None
         self._resources_el = None
         self._constraints_el = None
         self._state_el = None
+
+        # mgmtd stuff.
+        self._communicator = None
+        self._host = host
+        self._login = login
+        self._password = password
+
+
+    def _init_communicator(self):
+        if (self._communicator is None):
+            self._communicator = Communicator()
+            self._communicator.connect(self._host, self._login, self._password)
 
 
     def update(self):
@@ -185,8 +195,10 @@ class CIB(object):
 
 
     def enable_standby_mode(self, node_id):
+        self._init_communicator()
         self._communicator.enable_standby_mode(node_id)
     def cancel_standby_mode(self, node_id):
+        self._init_communicator()
         self._communicator.cancel_standby_mode(node_id)
 
 
@@ -225,6 +237,7 @@ class CIB(object):
 
 
     def create_vm(self, id, conf_file_path):
+        self._init_communicator()
         CIB._create_primitive_resource_el(parent_el=self._resources_el,
                                           id=id,
                                           tmpl_id=CIB.VM_TMPL_ID,
@@ -233,6 +246,7 @@ class CIB(object):
 
 
     def create_dummy(self, id, started=True):
+        self._init_communicator()
         CIB._create_primitive_resource_el(parent_el=self._resources_el,
                                           id=id,
                                           tmpl_id=CIB.DUMMY_TMPL_ID)
@@ -240,6 +254,7 @@ class CIB(object):
 
 
     def create_group(self, id, children_ids, started):
+        self._init_communicator()
         group_el = SubEl(self._resources_el, CIB.GROUP_TAG, {"id": id})
         CIB._create_meta_attrs_el(group_el, attrs={"target-role": CIB.STARTED_ROLE,
                                                     "ordered": "false",
@@ -321,6 +336,7 @@ class CIB(object):
 
 
     def _modify_target_role(self, id, target_role):
+        self._init_communicator()
         resource_type = self.get_resource_type(id)
         # Update group's children.
         if (const.resource_type.GROUP == resource_type):
@@ -335,13 +351,12 @@ class CIB(object):
         self._modify_target_role(id, CIB.STOPPED_ROLE)
 
     def manage(self, id):
+        self._init_communicator()
         self._communicator.modify_attr(id, "is-managed", "true")
 
     def unmanage(self, id):
+        self._init_communicator()
         self._communicator.modify_attr(id, "is-managed", "false")
-
-    def migrate_resource(self, resource_id, node_id):
-        self._communicator.migrate_resource(resource_id, node_id)
 
 
     def get_loc_constraints(self, id):
@@ -367,6 +382,7 @@ class CIB(object):
 
 
     def create_loc_constraint(self, resource_id, node_id):
+        self._init_communicator()
         self.remove_loc_constraints_by_resource(resource_id)
         attrs = {"rsc": resource_id,
                  "node": node_id,
@@ -378,6 +394,7 @@ class CIB(object):
 
     def remove_loc_constraints_by_resource(self, id):
         """ Remove all location constraints of the resource. """
+        self._init_communicator()
         for constr_el in self._get_loc_contraints_els_by_resource(id):
             self._constraints_el.remove(constr_el)
             self._communicator.remove_constraint(constr_el)
@@ -389,6 +406,7 @@ class CIB(object):
 
 
     def set_group(self, resource_id, group_id):
+        self._init_communicator()
         resource_el = self._get_primitive_resource_el(resource_id)
         target_group_el = self._get_group_el(group_id)
 
@@ -409,6 +427,7 @@ class CIB(object):
 
     def move_to_root(self, id):
         """ Moves the child resource to root. """
+        self._init_communicator()
         resource_el = self._get_primitive_resource_el(id)
         group_el = self._get_group_el_by_primitive(id)
         if (group_el is None):
@@ -431,6 +450,7 @@ class CIB(object):
 
 
     def remove_primitive_resource(self, id):
+        self._init_communicator()
         resource_el = self._get_primitive_resource_el(id)
         if (resource_el is None):
             return

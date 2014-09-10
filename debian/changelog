@@ -1,3 +1,9 @@
+cluster-tools (0.1.51) testing; urgency=medium
+
+  * Конектимся к mgmtd только когда он нужен..
+
+ -- Лаборатория 50 <team@lab50.net>  Wed, 10 Sep 2014 10:42:26 +0400
+
 cluster-tools (0.1.50) testing; urgency=medium
 
   * Отлавливаем исключение прип cleanup после удаления ресурса.
