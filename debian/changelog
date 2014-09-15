@@ -1,3 +1,9 @@
+cluster-tools (0.1.52) testing; urgency=medium
+
+  * Symlink.
+
+ -- Лаборатория 50 <team@lab50.net>  Mon, 15 Sep 2014 17:26:13 +0400
+
 cluster-tools (0.1.51) testing; urgency=medium
 
   * Конектимся к mgmtd только когда он нужен..

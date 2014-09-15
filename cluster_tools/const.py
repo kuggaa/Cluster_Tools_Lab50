@@ -36,6 +36,7 @@ class resource_type(object):
     NAME_SERVICE_CACHE_DAEMON = 18
     OPENLDAP_SERVER = 19
     RDP_SERVER = 20
+    SYMLINK = 21
 
 
     @staticmethod

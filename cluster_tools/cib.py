@@ -56,7 +56,8 @@ class CIB(object):
                  "aldd": const.resource_type.ALD_DAEMON,
                  "nscd": const.resource_type.NAME_SERVICE_CACHE_DAEMON,
                  "slapd": const.resource_type.OPENLDAP_SERVER,
-                 "xrdp": const.resource_type.RDP_SERVER}
+                 "xrdp": const.resource_type.RDP_SERVER,
+                 "symlink": const.resource_type.SYMLINK}
 
 
     @staticmethod
