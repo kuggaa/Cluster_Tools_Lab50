@@ -16,6 +16,9 @@ class LocConstarint(object):
 
 # Cluster Information Base.
 class CIB(object):
+    GET_REALTIME_STATUS_CMD = "sudo crm_mon --as-xml --one-shot --inactive"
+    GET_CIB_CMD = "sudo cibadmin --query --local"
+
     VM_TMPL_ID = "vm_template"
     DUMMY_TMPL_ID = "dummy_template"
     # Xpaths wrt cib element.
@@ -72,8 +75,7 @@ class CIB(object):
     # TODO: get rid of cmd.
     @staticmethod
     def get_real_time_state():
-        cmd = "sudo crm_mon --as-xml --one-shot --inactive"
-        xml_str = process.call(cmd.split(" "))
+        xml_str = process.call(CIB.GET_REALTIME_STATUS_CMD.split(" "))
         return ET.fromstring(xml_str)
 
 
@@ -168,8 +170,7 @@ class CIB(object):
 
 
     def update(self):
-        cmd = "sudo cibadmin --query --local"
-        cib_str = process.call(cmd.split(" "))
+        cib_str = process.call(CIB.GET_CIB_CMD.split(" "))
         self._cib_el = ET.fromstring(cib_str)
         self._state_el = CIB.get_real_time_state()
 

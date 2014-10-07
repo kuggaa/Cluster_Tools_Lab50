@@ -158,6 +158,10 @@ class Group(BaseResource):
                 return True
         return False
 
+    def remove(self):
+        for resource in self._resources.values():
+            resource.remove()
+
 
 class BaseClone(object):
     def is_group(self):
