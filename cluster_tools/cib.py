@@ -16,8 +16,9 @@ class LocConstarint(object):
 
 # Cluster Information Base.
 class CIB(object):
-    GET_REALTIME_STATUS_CMD = "sudo crm_mon --as-xml --one-shot --inactive"
     GET_CIB_CMD = "sudo cibadmin --query --local"
+    GET_REALTIME_STATUS_CMD = "sudo crm_mon --as-xml --one-shot --inactive"
+    CLEANUP_CMD = "sudo crm_resource --resource {id} --cleanup"
 
     VM_TMPL_ID = "vm_template"
     DUMMY_TMPL_ID = "dummy_template"
@@ -402,9 +403,8 @@ class CIB(object):
             self._communicator.remove_constraint(constr_el)
 
 
-    def cleanup(self, resource_id):
-        cmd = "sudo crm_resource --resource %s --cleanup" % (resource_id)
-        process.call(cmd.split(" "))
+    def cleanup(self, id):
+        process.call(CIB.CLEANUP_CMD.format(id=id).split(" "))
 
 
     def set_group(self, resource_id, group_id):
