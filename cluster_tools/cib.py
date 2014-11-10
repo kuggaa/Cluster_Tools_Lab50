@@ -49,7 +49,7 @@ class CIB(object):
                  "Filesystem": const.resource_type.FILESYSTEM,
                  "volume": const.resource_type.VOLUME,
                  "glusterd": const.resource_type.GLUSTERD,
-                 "external/ipmi": const.resource_type.IPMI,
+                 "fence_ipmilan": const.resource_type.IPMI,
                  "fence_apc_snmp": const.resource_type.PDU,
                  "apache2": const.resource_type.APACHE,
                  "nslcd": const.resource_type.LDAP_DAEMON,
