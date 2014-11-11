@@ -1,3 +1,9 @@
+cluster-tools (0.1.53) testing; urgency=medium
+
+  * Новая версия, правильно работающая с IPMI-ресурсами.
+
+ -- Лаборатория 50 <team@lab50.net>  Tue, 11 Nov 2014 12:45:40 +0300
+
 cluster-tools (0.1.52) testing; urgency=medium
 
   * Symlink.
